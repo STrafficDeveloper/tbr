@@ -1,0 +1,427 @@
+/* ==========================================================================
+   Admin panel. Loaded after app.css, so it reuses the tokens, buttons and
+   form fields and only adds the admin shell, tables and panels.
+   ========================================================================== */
+
+/* minmax(0, 1fr): a grid column otherwise grows to fit its widest content,
+   and the one-line phone menu would push the whole page sideways. */
+.admin {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 100dvh;
+}
+
+@media (min-width: 900px) {
+    .admin {
+        grid-template-columns: 240px minmax(0, 1fr);
+    }
+}
+
+/* --- Sidebar ------------------------------------------------------------ */
+.admin-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    padding: var(--sp-6) var(--sp-4);
+    border-right: 1px solid var(--c-border);
+    background: var(--c-surface);
+}
+
+@media (min-width: 900px) {
+    .admin-nav {
+        position: sticky;
+        top: 0;
+        height: 100dvh;
+        overflow-y: auto;
+    }
+}
+
+.admin-nav__brand {
+    color: var(--c-accent);
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.admin-nav__heading {
+    margin-top: var(--sp-4);
+    color: var(--c-muted);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* On phones the menu is a sideways-scrolling strip instead of a column. */
+.admin-nav__list {
+    display: flex;
+    gap: var(--sp-1);
+    overflow-x: auto;
+}
+
+@media (min-width: 900px) {
+    .admin-nav__list {
+        flex-direction: column;
+        overflow: visible;
+    }
+}
+
+.admin-nav__link {
+    display: block;
+    padding: var(--sp-2) var(--sp-3);
+    border-radius: var(--radius);
+    font-size: var(--fs-sm);
+    white-space: nowrap;
+}
+
+.admin-nav__link.is-active {
+    background: rgba(234, 184, 17, 0.14);
+    color: var(--c-accent);
+    font-weight: 600;
+}
+
+.admin-nav__footer {
+    display: grid;
+    gap: var(--sp-2);
+    margin-top: auto;
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--c-border);
+    color: var(--c-muted);
+    font-size: var(--fs-sm);
+}
+
+.admin-nav__footer button {
+    padding: 0;
+    color: var(--c-muted);
+    font-size: var(--fs-sm);
+    text-align: left;
+    text-decoration: underline;
+}
+
+/* --- Main area ---------------------------------------------------------- */
+.admin-main {
+    min-width: 0;
+    padding: var(--sp-6) var(--gutter) var(--sp-16);
+}
+
+@media (min-width: 900px) {
+    .admin-main {
+        padding: var(--sp-8) var(--sp-12) var(--sp-16);
+    }
+}
+
+.admin-main__title {
+    margin-bottom: var(--sp-6);
+    font-size: var(--fs-2xl);
+}
+
+.admin-main .flash {
+    margin: 0 0 var(--sp-6);
+}
+
+.admin-main .container {
+    padding: 0;
+}
+
+.admin-muted {
+    color: var(--c-muted);
+    font-size: var(--fs-sm);
+}
+
+.admin-empty {
+    padding: var(--sp-8);
+    border: 1px dashed var(--c-border);
+    border-radius: var(--radius);
+    color: var(--c-muted);
+    text-align: center;
+}
+
+.admin-empty a,
+.admin-main td a,
+.admin-panel__head a {
+    color: var(--c-accent);
+}
+
+/* --- Buttons ------------------------------------------------------------ */
+.admin-btn {
+    min-height: 36px;
+    padding: var(--sp-1) var(--sp-3);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.06);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.admin-btn:hover,
+.admin-btn:focus-visible {
+    border-color: var(--c-accent);
+}
+
+.admin-btn--approve {
+    border-color: var(--c-accent);
+    background: var(--c-accent);
+    color: var(--c-black);
+}
+
+.admin-btn--reject {
+    border-color: rgba(255, 90, 90, 0.5);
+    color: #ff8a8a;
+}
+
+.admin-inline {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+}
+
+/* --- Dashboard ---------------------------------------------------------- */
+.stat-tiles {
+    display: grid;
+    gap: var(--sp-4);
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    margin-bottom: var(--sp-8);
+}
+
+.stat-tile {
+    display: grid;
+    gap: var(--sp-1);
+    padding: var(--sp-6);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    background: var(--c-surface);
+}
+
+.stat-tile:hover,
+.stat-tile:focus-visible {
+    border-color: var(--c-accent);
+    color: inherit;
+}
+
+.stat-tile__value {
+    color: var(--c-accent);
+    font-family: var(--font-display);
+    font-size: var(--fs-2xl);
+    font-weight: 700;
+}
+
+.stat-tile__label {
+    color: var(--c-muted);
+    font-size: var(--fs-sm);
+}
+
+.admin-columns {
+    display: grid;
+    gap: var(--sp-6);
+}
+
+@media (min-width: 1200px) {
+    .admin-columns {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.admin-panel {
+    padding: var(--sp-6);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    background: var(--c-surface);
+}
+
+.admin-panel__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-4);
+}
+
+.admin-panel__head h2 {
+    font-size: var(--fs-lg);
+}
+
+.admin-list {
+    display: grid;
+}
+
+.admin-list__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    padding-block: var(--sp-3);
+    border-bottom: 1px solid var(--c-border);
+}
+
+.admin-list__item:last-child {
+    border-bottom: 0;
+}
+
+/* --- Lists, filters, tables --------------------------------------------- */
+.admin-toolbar,
+.admin-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-4);
+}
+
+.admin-filters label {
+    display: grid;
+    flex: 1 1 200px;
+    gap: var(--sp-1);
+}
+
+.admin-filters__actions {
+    display: flex;
+    gap: var(--sp-2);
+}
+
+.admin-search {
+    display: flex;
+    flex: 1 1 280px;
+    gap: var(--sp-2);
+    max-width: 480px;
+}
+
+.admin-filters .field__control,
+.admin-search .field__control {
+    min-height: 44px;
+}
+
+.admin-bulk {
+    display: grid;
+    gap: var(--sp-3);
+    justify-items: start;
+    margin-bottom: var(--sp-6);
+}
+
+/* position: relative keeps absolutely-positioned children (the visually
+   hidden column labels) inside the scroll area instead of widening the page. */
+.admin-table-wrap {
+    position: relative;
+    overflow-x: auto;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+}
+
+.admin-table th,
+.admin-table td {
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom: 1px solid var(--c-border);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.admin-table th {
+    background: var(--c-surface);
+    color: var(--c-muted);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.admin-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-table__actions {
+    white-space: nowrap;
+}
+
+.admin-table__actions > a {
+    margin-right: var(--sp-3);
+}
+
+.admin-thumb {
+    width: 64px;
+    height: 48px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.admin-tag {
+    display: inline-block;
+    margin: 2px;
+    padding: 2px var(--sp-2);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: var(--fs-xs);
+}
+
+/* --- Forms -------------------------------------------------------------- */
+.admin-form {
+    max-width: 760px;
+}
+
+.admin-form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+}
+
+.field__control--textarea {
+    min-height: auto;
+    resize: vertical;
+}
+
+.field__preview {
+    max-width: 240px;
+    max-height: 160px;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    object-fit: cover;
+}
+
+.field__inline-check {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+}
+
+.admin-children {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-6);
+}
+
+.admin-child {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-4);
+    border: 1px solid var(--c-accent);
+    border-radius: var(--radius);
+    font-weight: 600;
+}
+
+.admin-child__count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: var(--c-accent);
+    color: var(--c-black);
+    font-size: var(--fs-xs);
+}
+
+.admin-danger {
+    max-width: 760px;
+    margin-top: var(--sp-12);
+    padding-top: var(--sp-6);
+    border-top: 1px solid var(--c-border);
+}

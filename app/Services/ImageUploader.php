@@ -15,8 +15,14 @@ use RuntimeException;
 final class ImageUploader
 {
     public const MAX_BYTES = 2 * 1024 * 1024;
+    public const ADMIN_MAX_BYTES = 8 * 1024 * 1024;
     private const MAX_DIMENSION = 6000;
     private const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
+
+    /** @param int $maxBytes members get the default; the admin panel allows larger originals */
+    public function __construct(private readonly int $maxBytes = self::MAX_BYTES)
+    {
+    }
 
     /**
      * Crops to a centred square, resizes and saves as WebP.
@@ -52,6 +58,32 @@ final class ImageUploader
         return $this->save($square, $directory);
     }
 
+    /**
+     * Keeps the aspect ratio and only ever scales down, for photos, banners
+     * and covers where cropping would lose part of the picture.
+     *
+     * @param array<string,mixed> $file one entry from $_FILES
+     * @return string path relative to public/uploads
+     * @throws RuntimeException with a member-facing Malay message
+     */
+    public function storeResized(array $file, string $directory, int $maxWidth): string
+    {
+        $image = $this->open($file);
+        $width = imagesx($image);
+        $height = imagesy($image);
+
+        if ($width > $maxWidth) {
+            $newHeight = (int) round($height * $maxWidth / $width);
+            $resized = imagecreatetruecolor($maxWidth, $newHeight);
+            imagealphablending($resized, false);
+            imagesavealpha($resized, true);
+            imagecopyresampled($resized, $image, 0, 0, 0, 0, $maxWidth, $newHeight, $width, $height);
+            $image = $resized;
+        }
+
+        return $this->save($image, $directory);
+    }
+
     /** Deletes a previously stored upload, refusing anything outside uploads/. */
     public function delete(?string $relativePath): void
     {
@@ -72,8 +104,10 @@ final class ImageUploader
     {
         $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
 
+        $tooBig = 'Saiz gambar terlalu besar. Maksimum ' . (int) ($this->maxBytes / 1024 / 1024) . 'MB.';
+
         if ($error === UPLOAD_ERR_INI_SIZE || $error === UPLOAD_ERR_FORM_SIZE) {
-            throw new RuntimeException('Saiz gambar terlalu besar. Maksimum 2MB.');
+            throw new RuntimeException($tooBig);
         }
 
         $path = (string) ($file['tmp_name'] ?? '');
@@ -82,8 +116,8 @@ final class ImageUploader
             throw new RuntimeException('Gambar gagal dimuat naik. Sila cuba lagi.');
         }
 
-        if (filesize($path) > self::MAX_BYTES) {
-            throw new RuntimeException('Saiz gambar terlalu besar. Maksimum 2MB.');
+        if (filesize($path) > $this->maxBytes) {
+            throw new RuntimeException($tooBig);
         }
 
         // Trust the file's bytes, never the browser-supplied name or type.

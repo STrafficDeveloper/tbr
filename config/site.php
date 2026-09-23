@@ -21,21 +21,23 @@ return [
     'whatsapp' => Env::get('WHATSAPP_NUMBER', '60376669989'),
     'privacy_note' => 'Nota privasi: Data digunakan untuk pengesahan & update tour sahaja.',
 
+    // Footer social groups. URLs are set in Admin > Tetapan Laman (settings
+    // table, key = "setting"); a link with no URL yet is left out of the footer.
     'socials' => [
         'tbr' => [
             'label' => 'Ikuti The Bikers Ranger Di',
             'links' => [
-                'facebook' => ['label' => 'Facebook The Bikers Ranger', 'url' => '#'],
-                'instagram' => ['label' => 'Instagram The Bikers Ranger', 'url' => '#'],
-                'tiktok' => ['label' => 'Tiktok The Bikers Ranger', 'url' => '#'],
+                'facebook' => ['label' => 'Facebook The Bikers Ranger', 'setting' => 'social_tbr_facebook'],
+                'instagram' => ['label' => 'Instagram The Bikers Ranger', 'setting' => 'social_tbr_instagram'],
+                'tiktok' => ['label' => 'Tiktok The Bikers Ranger', 'setting' => 'social_tbr_tiktok'],
             ],
         ],
         'raja_kapcai' => [
             'label' => 'Ikuti Raja Kapcai Di',
             'links' => [
-                'facebook' => ['label' => 'Facebook Raja Kapcai', 'url' => '#'],
-                'instagram' => ['label' => 'Instagram Raja Kapcai', 'url' => '#'],
-                'tiktok' => ['label' => 'Tiktok Raja Kapcai', 'url' => '#'],
+                'facebook' => ['label' => 'Facebook Raja Kapcai', 'setting' => 'social_rk_facebook'],
+                'instagram' => ['label' => 'Instagram Raja Kapcai', 'setting' => 'social_rk_instagram'],
+                'tiktok' => ['label' => 'Tiktok Raja Kapcai', 'setting' => 'social_rk_tiktok'],
             ],
         ],
     ],

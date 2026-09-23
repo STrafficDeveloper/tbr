@@ -93,7 +93,38 @@ final class Validator
             'confirmed' => $value === ($this->data[$field . '_confirmation'] ?? null)
                 ? null
                 : "Pengesahan {$label} tidak sepadan.",
+            // http(s) only: a "javascript:" URL saved by an admin would run in visitors' browsers.
+            'url' => self::isHttpUrl((string) $value) ? null : "{$label} mesti bermula dengan https:// atau http://.",
+            // A full http(s) URL, or a path on this site such as /aktiviti/pemenang.
+            'link' => self::isHttpUrl((string) $value) || preg_match('#^/(?!/)[^\s\\\\]*$#', (string) $value) === 1
+                ? null
+                : "{$label} mesti pautan penuh (https://...) atau laluan laman bermula dengan /.",
+            'integer' => preg_match('/^-?\d+$/', (string) $value) === 1 ? null : "{$label} mesti nombor bulat.",
+            'numeric' => is_numeric($value) ? null : "{$label} mesti nombor.",
+            'date' => self::isDate((string) $value, 'Y-m-d') ? null : "{$label} bukan tarikh yang sah.",
+            'datetime' => self::isDate(str_replace('T', ' ', (string) $value), 'Y-m-d H:i')
+                || self::isDate(str_replace('T', ' ', (string) $value), 'Y-m-d H:i:s')
+                ? null
+                : "{$label} bukan tarikh dan masa yang sah.",
+            'slug' => preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', (string) $value) === 1
+                ? null
+                : "{$label} hanya boleh mengandungi huruf kecil, nombor dan sengkang (-).",
             default => throw new \InvalidArgumentException("Unknown validation rule: {$rule}"),
         };
+    }
+
+    private static function isHttpUrl(string $value): bool
+    {
+        $scheme = strtolower((string) parse_url($value, PHP_URL_SCHEME));
+
+        return in_array($scheme, ['http', 'https'], true) && filter_var($value, FILTER_VALIDATE_URL) !== false;
+    }
+
+    /** Strict: "2026-02-30" parses loosely in PHP, so round-trip it to be sure. */
+    private static function isDate(string $value, string $format): bool
+    {
+        $date = \DateTimeImmutable::createFromFormat('!' . $format, $value);
+
+        return $date !== false && $date->format($format) === $value;
     }
 }

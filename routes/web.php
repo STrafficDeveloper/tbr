@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Controllers\Admin\DashboardController;
+use App\Controllers\Admin\MemberController;
+use App\Controllers\Admin\RegistrationController;
+use App\Controllers\Admin\ResourceController;
+use App\Controllers\Admin\SettingsController;
 use App\Controllers\AktivitiController;
 use App\Controllers\AuthController;
 use App\Controllers\HallOfFameController;
@@ -57,6 +62,25 @@ $router->get('/hall-of-fame/{slug}/konten', [HallOfFameController::class, 'conte
 $router->get('/hall-of-fame/{slug}/galeri', [HallOfFameController::class, 'gallery']);
 
 $router->get('/panas-atas-jalan', [PanasAtasJalanController::class, 'index']);
+
+// Admin. Every controller here checks admin rights in its constructor.
+// Fixed paths first: /admin/urus/{resource}/baru must beat /{id}.
+$router->get('/admin', [DashboardController::class, 'index']);
+$router->get('/admin/pendaftaran', [RegistrationController::class, 'index']);
+$router->get('/admin/pendaftaran/eksport', [RegistrationController::class, 'export']);
+$router->post('/admin/pendaftaran/{id}/status', [RegistrationController::class, 'updateStatus']);
+$router->get('/admin/ahli', [MemberController::class, 'index']);
+$router->get('/admin/ahli/eksport-whatsapp', [MemberController::class, 'exportWhatsapp']);
+$router->post('/admin/ahli/{id}/status', [MemberController::class, 'updateStatus']);
+$router->get('/admin/tetapan', [SettingsController::class, 'edit']);
+$router->post('/admin/tetapan', [SettingsController::class, 'update']);
+$router->get('/admin/urus/{resource}', [ResourceController::class, 'index']);
+$router->get('/admin/urus/{resource}/baru', [ResourceController::class, 'create']);
+$router->post('/admin/urus/{resource}/muat-naik', [ResourceController::class, 'bulkUpload']);
+$router->post('/admin/urus/{resource}', [ResourceController::class, 'store']);
+$router->get('/admin/urus/{resource}/{id}', [ResourceController::class, 'edit']);
+$router->post('/admin/urus/{resource}/{id}', [ResourceController::class, 'update']);
+$router->post('/admin/urus/{resource}/{id}/padam', [ResourceController::class, 'destroy']);
 
 // Directory
 $router->get('/port-rider', [PortRiderController::class, 'index']);

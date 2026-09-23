@@ -3,8 +3,25 @@
 declare(strict_types=1);
 
 use App\Core\Config;
+use App\Repositories\SiteRepository;
 
 $site = Config::get('site');
+$settings = new SiteRepository();
+
+// Only links an admin has filled in; an empty group is left out entirely.
+$socialGroups = [];
+foreach ($site['socials'] as $group) {
+    $links = [];
+    foreach ($group['links'] as $platform => $link) {
+        $url = $settings->setting($link['setting']);
+        if ($url !== '') {
+            $links[$platform] = ['label' => $link['label'], 'url' => $url];
+        }
+    }
+    if ($links !== []) {
+        $socialGroups[] = ['label' => $group['label'], 'links' => $links];
+    }
+}
 ?>
 <footer class="site-footer">
     <div class="site-footer__inner">
@@ -27,7 +44,7 @@ $site = Config::get('site');
             </ul>
         </nav>
 
-<?php foreach ($site['socials'] as $group): ?>
+<?php foreach ($socialGroups as $group): ?>
         <div class="site-footer__socials">
             <h2 class="site-footer__heading"><?= e($group['label']) ?></h2>
             <ul>

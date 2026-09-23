@@ -57,6 +57,9 @@ $isActive = static function (array $item) use ($current): bool {
 
         <div class="site-header__auth">
 <?php if (Auth::check()): ?>
+<?php if (Auth::isAdmin()): ?>
+            <a class="site-header__auth-link site-header__auth-link--cta" href="/admin">ADMIN</a>
+<?php endif; ?>
             <a class="site-header__auth-link" href="/tetapan">PROFILE</a>
             <form class="site-header__logout" method="post" action="/log-keluar">
                 <?= \App\Core\Csrf::field() ?>

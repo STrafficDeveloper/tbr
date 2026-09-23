@@ -104,6 +104,68 @@ final class UserRepository
         Database::execute('UPDATE users SET avatar_path = ? WHERE id = ?', [$path, $id]);
     }
 
+    /** @return list<array<string,mixed>> */
+    public function adminList(string $search, ?string $filter, int $limit, int $offset): array
+    {
+        [$where, $bindings] = $this->adminFilters($search, $filter);
+
+        return Database::select(
+            "SELECT id, name, email, phone, state, role, status, follows_tbr, follows_raja_kapcai,
+                    whatsapp_opt_in, contest_opt_in, created_at
+             FROM users WHERE {$where}
+             ORDER BY created_at DESC
+             LIMIT ? OFFSET ?",
+            [...$bindings, $limit, $offset],
+        );
+    }
+
+    public function adminCount(string $search, ?string $filter): int
+    {
+        [$where, $bindings] = $this->adminFilters($search, $filter);
+        $row = Database::selectOne("SELECT COUNT(*) AS n FROM users WHERE {$where}", $bindings);
+
+        return (int) ($row['n'] ?? 0);
+    }
+
+    /** @return array{members:int,whatsapp:int,new_this_week:int} */
+    public function stats(): array
+    {
+        $row = Database::selectOne(
+            "SELECT COUNT(*) AS members,
+                    COALESCE(SUM(whatsapp_opt_in), 0) AS whatsapp,
+                    COALESCE(SUM(created_at >= NOW() - INTERVAL 7 DAY), 0) AS new_this_week
+             FROM users WHERE role = 'member'",
+        );
+
+        return array_map('intval', (array) $row);
+    }
+
+    public function setStatus(int $id, string $status): void
+    {
+        Database::execute('UPDATE users SET status = ? WHERE id = ?', [$status, $id]);
+    }
+
+    /** @return array{0:string,1:list<string>} */
+    private function adminFilters(string $search, ?string $filter): array
+    {
+        $where = ["role = 'member'"];
+        $bindings = [];
+
+        if ($filter === 'whatsapp') {
+            $where[] = 'whatsapp_opt_in = 1';
+        } elseif ($filter === 'suspended') {
+            $where[] = "status = 'suspended'";
+        }
+
+        if ($search !== '') {
+            $like = '%' . addcslashes($search, '%_\\') . '%';
+            $where[] = '(name LIKE ? OR email LIKE ? OR phone LIKE ?)';
+            array_push($bindings, $like, $like, $like);
+        }
+
+        return [implode(' AND ', $where), $bindings];
+    }
+
     private function exists(string $column, string $value, ?int $exceptId): bool
     {
         $sql = "SELECT id FROM users WHERE {$column} = ?";
