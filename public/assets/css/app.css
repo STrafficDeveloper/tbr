@@ -576,9 +576,11 @@ p {
    ========================================================================== */
 
 /* --- Icons -------------------------------------------------------------- */
+/* fill: none by default; the heart symbol inherits it so a liked heart can fill. */
 .icon {
     display: inline-block;
     flex-shrink: 0;
+    fill: none;
     width: 1.25em;
     height: 1.25em;
     vertical-align: -0.2em;
@@ -1681,4 +1683,40 @@ h1.section-heading__title {
     .settings__form {
         padding: var(--sp-12);
     }
+}
+
+/* --- Like button (Port Rider cards) ------------------------------------- */
+.like-form {
+    display: contents;
+}
+
+.like-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    min-height: 32px;
+    margin: calc(var(--sp-1) * -1) 0;
+    padding: var(--sp-1) var(--sp-2);
+    border-radius: 999px;
+    color: var(--c-muted);
+    font-size: var(--fs-sm);
+    transition: color 0.2s var(--ease), background-color 0.2s var(--ease);
+}
+
+.like-button:hover,
+.like-button:focus-visible {
+    background: rgba(234, 184, 17, 0.12);
+    color: var(--c-accent);
+}
+
+.like-button[aria-pressed="true"] {
+    color: var(--c-accent);
+}
+
+.like-button[aria-pressed="true"] .icon {
+    fill: currentColor;
+}
+
+.like-button:disabled {
+    opacity: 0.6;
 }

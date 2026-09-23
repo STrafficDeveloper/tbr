@@ -31,3 +31,5 @@ $router->post('/tetapan/gambar', [ProfileController::class, 'updateAvatar']);
 
 // Directory
 $router->get('/port-rider', [PortRiderController::class, 'index']);
+$router->post('/port-rider/{slug}/suka', [PortRiderController::class, 'like']);
+$router->post('/port-rider/{slug}/lihat', [PortRiderController::class, 'recordView']);

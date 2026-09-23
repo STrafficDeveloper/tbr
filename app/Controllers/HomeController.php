@@ -26,6 +26,7 @@ final class HomeController extends Controller
         $banners = new BannerRepository();
         $portRiders = new PortRiderRepository();
         $events = (new PitStopEventRepository())->upcoming(self::EVENTS_SHOWN);
+        $places = $portRiders->search(null, null, self::PORT_RIDERS_SHOWN);
 
         $seo = $this->seo()
             ->setTitle('Komuniti Biker Malaysia')
@@ -47,7 +48,8 @@ final class HomeController extends Controller
             'sponsorBanners' => $banners->forPlacement('home_sponsor'),
             'stats' => $site->stats(),
             'events' => $events,
-            'portRiders' => $portRiders->search(null, null, self::PORT_RIDERS_SHOWN),
+            'portRiders' => $places,
+            'likedPlaceIds' => PortRiderController::likedIdsFor($portRiders, $places),
             'portRiderStates' => $portRiders->statesWithListings(),
             'hero' => (new HallOfFameRepository())->heroOfMonth(),
             'featuredVideo' => (new VideoRepository())->latest('panas_atas_jalan', 1)[0] ?? null,

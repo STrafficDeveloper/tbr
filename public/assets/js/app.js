@@ -67,6 +67,56 @@
         }, 6000);
     }
 
+    // Hearts: post in the background and update in place. Without JS (or if
+    // this fails) the form simply submits and the server redirects back.
+    document.addEventListener('submit', function (event) {
+        var form = event.target.closest('[data-like-form]');
+
+        if (!form || !window.fetch) {
+            return;
+        }
+
+        event.preventDefault();
+        var button = form.querySelector('button');
+        button.disabled = true;
+
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { Accept: 'application/json' },
+            credentials: 'same-origin'
+        })
+            .then(function (response) {
+                return response.ok ? response.json() : Promise.reject(response);
+            })
+            .then(function (data) {
+                button.setAttribute('aria-pressed', String(data.liked));
+                form.querySelector('[data-like-count]').textContent = data.label;
+                form.querySelector('[data-like-total]').textContent = data.count.toLocaleString('en-US');
+            })
+            .catch(function () {
+                form.submit();
+            })
+            .finally(function () {
+                button.disabled = false;
+            });
+    });
+
+    // "View Location" opens the map in a new tab; tell the server so the eye
+    // count goes up. sendBeacon survives the page losing focus.
+    document.addEventListener('click', function (event) {
+        var link = event.target.closest('[data-view-beacon]');
+        var token = document.querySelector('input[name="_csrf_token"]');
+
+        if (!link || !token || !navigator.sendBeacon) {
+            return;
+        }
+
+        var body = new FormData();
+        body.append('_csrf_token', token.value);
+        navigator.sendBeacon(link.getAttribute('data-view-beacon'), body);
+    });
+
     document.querySelectorAll('[data-submenu-toggle]').forEach(function (toggle) {
         toggle.addEventListener('click', function () {
             var submenu = document.getElementById(toggle.getAttribute('aria-controls'));

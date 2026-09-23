@@ -86,6 +86,30 @@ final class Database
         return $statement;
     }
 
+    /**
+     * Runs $work atomically: every statement commits together or none do.
+     *
+     * @template T
+     * @param callable(): T $work
+     * @return T
+     */
+    public static function transaction(callable $work): mixed
+    {
+        $pdo = self::connection();
+        $pdo->beginTransaction();
+
+        try {
+            $result = $work();
+            $pdo->commit();
+
+            return $result;
+        } catch (\Throwable $exception) {
+            $pdo->rollBack();
+
+            throw $exception;
+        }
+    }
+
     /** @param array<string|int,mixed> $bindings */
     public static function insert(string $sql, array $bindings = []): int
     {

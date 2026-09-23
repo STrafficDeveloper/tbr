@@ -22,5 +22,5 @@ use App\Core\View;
 <?= View::partial('pages/home/gathering', ['site' => $site]) ?>
 <?= View::partial('pages/home/sponsors', ['banners' => $sponsorBanners]) ?>
 <?= View::partial('pages/home/highlights', ['events' => $events]) ?>
-<?= View::partial('pages/home/port-rider', ['places' => $portRiders, 'states' => $portRiderStates]) ?>
+<?= View::partial('pages/home/port-rider', ['places' => $portRiders, 'states' => $portRiderStates, 'likedIds' => $likedPlaceIds]) ?>
 <?= View::partial('pages/home/features', ['hero' => $hero, 'video' => $featuredVideo]) ?>

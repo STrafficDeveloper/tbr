@@ -36,7 +36,7 @@ $summary = number_format($paginator->total) . ' lokasi'
         <h2 class="visually-hidden">Senarai lokasi</h2>
         <div class="grid">
 <?php foreach ($places as $place): ?>
-            <?= component('card-port-rider', ['place' => $place]) ?>
+            <?= component('card-port-rider', ['place' => $place, 'liked' => in_array((int) $place['id'], $likedIds, true)]) ?>
 <?php endforeach; ?>
         </div>
         <?= component('pagination', ['paginator' => $paginator]) ?>

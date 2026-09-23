@@ -12,12 +12,31 @@ final class Response
         exit;
     }
 
-    public static function back(): never
+    /**
+     * Returns to the referring page on this site, filters and all. Only the
+     * path and query are reused, so a forged Referer can't send anyone away.
+     */
+    public static function back(string $fallback = '/', string $fragment = ''): never
     {
-        $referer = $_SERVER['HTTP_REFERER'] ?? '/';
-        $path = parse_url((string) $referer, PHP_URL_PATH);
+        $referer = (string) ($_SERVER['HTTP_REFERER'] ?? '');
+        $parts = parse_url($referer);
+        // HTTP_HOST carries the port when it isn't 80/443, so compare like with like.
+        $refererHost = is_array($parts) && isset($parts['host'])
+            ? $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '')
+            : null;
+        $sameHost = $refererHost !== null && strcasecmp($refererHost, (string) ($_SERVER['HTTP_HOST'] ?? '')) === 0;
+        $path = $parts['path'] ?? '';
 
-        self::redirect(is_string($path) ? $path : '/');
+        $target = $sameHost && str_starts_with($path, '/') && !str_starts_with($path, '//')
+            ? $path . (isset($parts['query']) ? '?' . $parts['query'] : '')
+            : $fallback;
+
+        self::redirect($target . ($fragment !== '' ? '#' . rawurlencode($fragment) : ''));
+    }
+
+    public static function wantsJson(): bool
+    {
+        return str_contains((string) ($_SERVER['HTTP_ACCEPT'] ?? ''), 'application/json');
     }
 
     public static function json(mixed $data, int $status = 200): never
