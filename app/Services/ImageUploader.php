@@ -68,20 +68,23 @@ final class ImageUploader
      */
     public function storeResized(array $file, string $directory, int $maxWidth): string
     {
-        $image = $this->open($file);
-        $width = imagesx($image);
-        $height = imagesy($image);
+        return $this->saveResized($this->open($file), $directory, $maxWidth);
+    }
 
-        if ($width > $maxWidth) {
-            $newHeight = (int) round($height * $maxWidth / $width);
-            $resized = imagecreatetruecolor($maxWidth, $newHeight);
-            imagealphablending($resized, false);
-            imagesavealpha($resized, true);
-            imagecopyresampled($resized, $image, 0, 0, 0, 0, $maxWidth, $newHeight, $width, $height);
-            $image = $resized;
+    /**
+     * Same as storeResized() for a file already on the server, such as the
+     * launch photos in database/seed-media. Skips the upload checks, so it
+     * must only ever be given paths the code chose, never user input.
+     *
+     * @return string path relative to public/uploads
+     */
+    public function importResized(string $path, string $directory, int $maxWidth): string
+    {
+        if (!is_file($path)) {
+            throw new RuntimeException("Image not found: {$path}");
         }
 
-        return $this->save($image, $directory);
+        return $this->saveResized($this->decode($path), $directory, $maxWidth);
     }
 
     /** Deletes a previously stored upload, refusing anything outside uploads/. */
@@ -120,6 +123,11 @@ final class ImageUploader
             throw new RuntimeException($tooBig);
         }
 
+        return $this->decode($path);
+    }
+
+    private function decode(string $path): GdImage
+    {
         // Trust the file's bytes, never the browser-supplied name or type.
         $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($path);
         $info = getimagesize($path);
@@ -170,6 +178,24 @@ final class ImageUploader
         $rotated = imagerotate($image, $angle, 0);
 
         return $rotated instanceof GdImage ? $rotated : $image;
+    }
+
+    /** Keeps the aspect ratio and only ever scales down. */
+    private function saveResized(GdImage $image, string $directory, int $maxWidth): string
+    {
+        $width = imagesx($image);
+        $height = imagesy($image);
+
+        if ($width > $maxWidth) {
+            $newHeight = (int) round($height * $maxWidth / $width);
+            $resized = imagecreatetruecolor($maxWidth, $newHeight);
+            imagealphablending($resized, false);
+            imagesavealpha($resized, true);
+            imagecopyresampled($resized, $image, 0, 0, 0, 0, $maxWidth, $newHeight, $width, $height);
+            $image = $resized;
+        }
+
+        return $this->save($image, $directory);
     }
 
     private function save(GdImage $image, string $directory): string

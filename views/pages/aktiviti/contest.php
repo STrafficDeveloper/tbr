@@ -55,7 +55,11 @@ $phaseLabels = ['ongoing' => 'Sedang Berlangsung', 'upcoming' => 'Akan Datang', 
                 <h2>Senarai Hadiah</h2>
                 <ul class="prize-list">
 <?php foreach ($prizes as $prize): ?>
-                    <li>
+                    <li<?= !empty($prize['image']) ? ' class="prize-list__item--image"' : '' ?>>
+<?php if (!empty($prize['image'])): ?>
+                        <img class="prize-list__image" src="<?= e(uploaded($prize['image'])) ?>" alt=""
+                             width="160" height="140" loading="lazy" decoding="async">
+<?php endif; ?>
                         <span class="prize-list__rank"><?= e($prize['rank_label']) ?></span>
                         <span><?= e($prize['prize_name']) ?><?= !empty($prize['prize_value']) ? ' — ' . e($prize['prize_value']) : '' ?></span>
                     </li>

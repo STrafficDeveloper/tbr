@@ -54,7 +54,7 @@ final class ContestRepository
     public function prizes(int $contestId): array
     {
         return Database::select(
-            'SELECT id, rank_label, prize_name, prize_value FROM contest_prizes WHERE contest_id = ? ORDER BY sort_order, id',
+            'SELECT id, rank_label, prize_name, prize_value, image FROM contest_prizes WHERE contest_id = ? ORDER BY sort_order, id',
             [$contestId],
         );
     }

@@ -22,7 +22,7 @@ if ($banners === []) {
             : '')
         . '<img src="' . e(uploaded($banner['image_mobile'] ?: $banner['image_desktop'])) . '"'
         . ' alt="' . e($banner['alt_text'] ?: $banner['title']) . '"'
-        . ' width="1064" height="413" loading="lazy" decoding="async">'
+        . ' width="1064" height="379" loading="lazy" decoding="async">'
         . '</picture>';
 ?>
 <?php if (!empty($banner['link_url'])): ?>

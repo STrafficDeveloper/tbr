@@ -1,5 +1,12 @@
 # Figma export checklist
 
+> **Status: done.** All 44 files were exported. The site uses optimised
+> copies: design graphics in `public/assets/img/`, launch photos in
+> `database/seed-media/` (loaded by `php bin/seed.php`). The raw exports were
+> removed from the tree after processing and remain in git history
+> (commit `d8cc621`, folder `design-exports/`). `huat-motor.jpg` was left out:
+> the design reuses the MotoKTM storefront photo for it.
+
 Images to export from the Figma design **Hive's Community Website (Copy)** for
 The Bikers Ranger site. Each link opens Figma with that exact layer selected.
 
@@ -36,10 +43,10 @@ Upload all of them to the GitHub repo **strafficdeveloper/tbr**, branch
 |---|---|---|---|---|---|
 | 1 | `rider-cutout.png` | [Character Ride Motor 1](https://www.figma.com/design/uML1rgiu4VKu81eclRNAcq/Hive-s-Community-Website--Copy-?node-id=58059-332) | PNG | 2x | Rider on motorbike beside the home sign-up form (transparent) |
 | 2 | `tbr-semalaya.png` | [TBR-Semalaya 2](https://www.figma.com/design/uML1rgiu4VKu81eclRNAcq/Hive-s-Community-Website--Copy-?node-id=58059-333) | PNG | 2x | Stylised title graphic in the home hero |
-| 3 | `texture-dark.jpg` | [Texture Background](https://www.figma.com/design/uML1rgiu4VKu81eclRNAcq/Hive-s-Community-Website--Copy-?node-id=58059-304) | JPG | 1x | Dark grunge page background |
+| 3 | `texture-dark.jpg` | [Texture Background](https://www.figma.com/design/uML1rgiu4VKu81eclRNAcq/Hive-s-Community-Website--Copy-?node-id=58059-304) | JPG | 1x | Dark grunge page background. The layer is a 10% overlay, so export it on a `#101010` background or it comes out white |
 | 4 | `texture-yellow.png` | [yellow texture](https://www.figma.com/design/uML1rgiu4VKu81eclRNAcq/Hive-s-Community-Website--Copy-?node-id=58593-3673) | PNG | 1x | Yellow brush band ("Bukan race. Bukan rally." section) |
 | 5 | `ripped-edge.svg` | [Vector](https://www.figma.com/design/uML1rgiu4VKu81eclRNAcq/Hive-s-Community-Website--Copy-?node-id=58600-8647) | SVG | - | Torn-edge divider under the yellow band |
-| 6 | `pitstop-event-card.png` | [Rectangle 262](https://www.figma.com/design/uML1rgiu4VKu81eclRNAcq/Hive-s-Community-Website--Copy-?node-id=58600-4242) | PNG | 3x | "PITSTOP EVENT" artwork on the event cards |
+| 6 | `pitstop-event-card.png` | [Rectangle 73](https://www.figma.com/design/uML1rgiu4VKu81eclRNAcq/Hive-s-Community-Website--Copy-?node-id=58593-3187) | PNG | 3x | "PITSTOP EVENT" artwork on the event cards |
 
 ## B. Home page hero
 

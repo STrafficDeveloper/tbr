@@ -10,6 +10,7 @@ declare(strict_types=1);
  */
 
 use App\Core\Database;
+use App\Services\ImageUploader;
 
 require dirname(__DIR__) . '/bootstrap.php';
 
@@ -188,14 +189,19 @@ foreach ($contests as [$title, $startsOn, $endsOn, $announceOn]) {
         'status' => 'published',
     ], 'slug');
 
-    Database::execute('DELETE FROM contest_prizes WHERE contest_id = ?', [$contestId]);
-
+    // Matched on rank so a re-run keeps prize photos and admin edits.
     $prizeIds = [];
     foreach ($prizes as $i => [$rankLabel, $prizeName]) {
-        $prizeIds[] = Database::insert(
-            'INSERT INTO contest_prizes (contest_id, rank_label, prize_name, sort_order) VALUES (?, ?, ?, ?)',
-            [$contestId, $rankLabel, $prizeName, $i],
+        $existing = Database::selectOne(
+            'SELECT id FROM contest_prizes WHERE contest_id = ? AND rank_label = ? LIMIT 1',
+            [$contestId, $rankLabel],
         );
+        $prizeIds[] = $existing !== null
+            ? (int) $existing['id']
+            : Database::insert(
+                'INSERT INTO contest_prizes (contest_id, rank_label, prize_name, sort_order) VALUES (?, ?, ?, ?)',
+                [$contestId, $rankLabel, $prizeName, $i],
+            );
     }
 
     // Sample winners for the first round only, using the design's placeholder
@@ -293,8 +299,34 @@ foreach (['Teaser', 'Interview Pt.1', 'Interview Pt.2', 'Interview Pt.3'] as $i 
     ], 'slug');
 }
 
+/**
+ * Banners have no natural unique key, so they are matched on placement and
+ * title. New rows are inserted as published; existing rows are left alone.
+ *
+ * @param array<string,mixed> $extra
+ */
+function ensureBanner(string $placement, string $title, array $extra = []): int
+{
+    $found = Database::selectOne('SELECT id FROM banners WHERE placement = ? AND title = ? LIMIT 1', [$placement, $title]);
+
+    if ($found !== null) {
+        return (int) $found['id'];
+    }
+
+    $row = ['title' => $title, 'placement' => $placement, 'status' => 'published'] + $extra;
+
+    return Database::insert(
+        sprintf(
+            'INSERT INTO banners (`%s`) VALUES (%s)',
+            implode('`, `', array_keys($row)),
+            implode(', ', array_fill(0, count($row), '?')),
+        ),
+        array_values($row),
+    );
+}
+
 // --- Promo banners shown above the footer --------------------------------
-Database::execute("DELETE FROM banners WHERE placement = 'global'");
+// Matched on title, so re-running keeps any image or edits made in the admin.
 
 $banners = [
     [
@@ -313,11 +345,12 @@ $banners = [
 ];
 
 foreach ($banners as $i => [$title, $body, $link, $cta]) {
-    Database::insert(
-        'INSERT INTO banners (title, body, placement, link_url, cta_label, sort_order, status)
-         VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [$title, $body, 'global', $link, $cta, $i, 'published'],
-    );
+    ensureBanner('global', $title, [
+        'body' => $body,
+        'link_url' => $link,
+        'cta_label' => $cta,
+        'sort_order' => $i,
+    ]);
 }
 
 // --- Editable site copy --------------------------------------------------
@@ -333,6 +366,69 @@ $settings = [
 
 foreach ($settings as $key => $value) {
     upsert('settings', ['setting_key' => $key, 'setting_value' => $value], 'setting_key');
+}
+
+// --- Launch photos --------------------------------------------------------
+// Images exported from the design, stored in database/seed-media and copied
+// into public/uploads exactly as if an admin had uploaded them. A column that
+// already holds an image is never overwritten, so admin changes survive.
+$media = BASE_PATH . '/database/seed-media/';
+$uploader = new ImageUploader(ImageUploader::ADMIN_MAX_BYTES);
+
+$attach = static function (string $table, int $id, string $column, string $file, int $maxWidth) use ($media, $uploader): void {
+    if ($id === 0) {
+        return;
+    }
+
+    $row = Database::selectOne(sprintf('SELECT `%s` AS current FROM `%s` WHERE id = ?', $column, $table), [$id]);
+
+    if ($row === null || !empty($row['current'])) {
+        return;
+    }
+
+    $path = $uploader->importResized($media . $file, str_replace('_', '-', $table), $maxWidth);
+    Database::execute(sprintf('UPDATE `%s` SET `%s` = ? WHERE id = ?', $table, $column), [$path, $id]);
+};
+
+$idFor = static function (string $table, string $column, string $value): int {
+    $row = Database::selectOne(sprintf('SELECT id FROM `%s` WHERE `%s` = ? LIMIT 1', $table, $column), [$value]);
+
+    return (int) ($row['id'] ?? 0);
+};
+
+// Home hero backdrops.
+foreach ([['Konvoi TBR', 'hero-1.webp'], ['Biker Hero', 'hero-2.webp']] as $i => [$title, $file]) {
+    $attach('banners', ensureBanner('home_hero', $title, ['sort_order' => $i]), 'image_desktop', $file, 2200);
+}
+
+// Sponsor strip.
+$iqos = ensureBanner('home_sponsor', 'IQOS ORIGINALS DUO', ['alt_text' => 'IQOS ORIGINALS DUO Baru']);
+$attach('banners', $iqos, 'image_desktop', 'sponsor-iqos-desktop.webp', 2200);
+$attach('banners', $iqos, 'image_mobile', 'sponsor-iqos-mobile.webp', 900);
+
+// Photos beside the footer promo copy.
+$attach('banners', ensureBanner('global', 'Moh Lepak Sama Geng The Bikers Ranger'), 'image_desktop', 'promo-moh-lepak.webp', 1200);
+$attach('banners', ensureBanner('global', 'Tahniah Kepada Semua 100 Pemenang'), 'image_desktop', 'promo-tahniah.webp', 1200);
+
+// Port Rider shop photos, one file per listing slug.
+foreach (glob($media . 'port-rider/*.webp') ?: [] as $file) {
+    $attach('port_riders', $idFor('port_riders', 'slug', basename($file, '.webp')), 'image', 'port-rider/' . basename($file), 1200);
+}
+
+// Hall of Fame: Wazi Abdul Hamid.
+$waziId = $idFor('hof_profiles', 'slug', 'wazi-abdul-hamid');
+$attach('hof_profiles', $waziId, 'avatar', 'wazi-avatar.webp', 600);
+$attach('hof_profiles', $waziId, 'cover_image', 'wazi-feature.webp', 1600);
+
+// The Panas Atas Jalan photo from the home page design, on the featured video.
+$attach('videos', $idFor('videos', 'slug', 'abam-penyelamat-kucing'), 'thumbnail', 'panas-atas-jalan.webp', 960);
+
+// Prize photos for every contest's first two prizes.
+$prizePhotos = ['Hadiah Utama' => 'prize-a.webp', 'Tempat Ke-2' => 'prize-b.webp'];
+foreach ($prizePhotos as $rankLabel => $file) {
+    foreach (Database::select('SELECT id FROM contest_prizes WHERE rank_label = ?', [$rankLabel]) as $prize) {
+        $attach('contest_prizes', (int) $prize['id'], 'image', $file, 800);
+    }
 }
 
 echo 'Seeding complete.' . PHP_EOL;

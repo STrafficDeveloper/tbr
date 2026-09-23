@@ -87,7 +87,8 @@ html {
 
 body {
     min-height: 100dvh;
-    background: var(--c-bg);
+    /* The design's grunge texture, tiled down the page at its native width. */
+    background: var(--c-bg) url("../img/texture-dark.webp") center top / 1440px auto repeat-y;
     color: var(--c-text);
     font-family: var(--font-body);
     font-size: var(--fs-base);
@@ -1178,9 +1179,14 @@ h1.section-heading__title {
     gap: var(--sp-12);
 }
 
+.hero__brand {
+    width: min(100%, 300px);
+    margin-bottom: var(--sp-4);
+}
+
 .hero__title {
-    max-width: 14ch;
-    font-size: var(--fs-3xl);
+    max-width: 22ch;
+    font-size: var(--fs-2xl);
 }
 
 .hero__rider {
@@ -1333,13 +1339,32 @@ h1.section-heading__title {
 }
 
 /* --- Home: gathering band ----------------------------------------------- */
+/* Yellow brush band from the design: its torn top edge is part of the
+   texture image, and a dark torn strip is laid over the bottom edge. */
 .gathering {
-    padding-block: var(--sp-16);
-    background:
-        repeating-linear-gradient(135deg, rgba(16, 16, 16, 0.05) 0 2px, transparent 2px 12px),
-        var(--c-yellow);
+    position: relative;
+    padding-block: var(--sp-16) calc(var(--sp-12) + 14vw);
+    background: url("../img/texture-yellow.webp") center top / cover no-repeat;
     color: var(--c-black);
     text-align: center;
+}
+
+.gathering::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    /* The SVG is 283 units tall but its shape ends at 251-258; crop the tail
+       so no yellow shows beneath the torn edge. */
+    aspect-ratio: 1440 / 251;
+    background: url("../img/ripped-edge.svg") center top / 100% auto no-repeat;
+    pointer-events: none;
+}
+
+.gathering > .container {
+    position: relative;
+    z-index: 1;
 }
 
 .gathering__title {
@@ -1390,7 +1415,7 @@ h1.section-heading__title {
 
 @media (min-width: 768px) {
     .gathering {
-        padding-block: var(--sp-24);
+        padding-block: var(--sp-24) calc(var(--sp-16) + 12vw);
     }
 
     .gathering__features {
@@ -2159,6 +2184,19 @@ h1.section-heading__title {
 .prize-list li {
     display: grid;
     gap: var(--sp-1);
+}
+
+.prize-list__item--image {
+    grid-template-columns: 96px 1fr;
+    align-content: center;
+    column-gap: var(--sp-4);
+}
+
+.prize-list__image {
+    grid-row: span 2;
+    width: 96px;
+    height: 84px;
+    object-fit: contain;
 }
 
 .prize-list__rank {

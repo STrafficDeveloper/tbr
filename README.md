@@ -84,7 +84,9 @@ Only `public/` should be reachable from the web.
    The seed script prints the admin password **once**. Store it in your
    password manager. You can also set it yourself with `ADMIN_PASSWORD=...`.
 
-   The seed loads the copy from the approved design. The pit stop dates in
+   The seed loads the copy and photos from the approved design (the photos
+   come from `database/seed-media/` and are copied into `public/uploads/`,
+   so they can be replaced in the admin like any upload). The pit stop dates in
    it are **demo dates**: replace them with the real tour in *Admin → Pit
    Stop* before launch, and remove any other sample content you do not want.
 
@@ -143,7 +145,10 @@ text or placeholders.
 | `logo-tbr.png` | Logo in Google's structured data | From the design |
 | `logo-raja-kapcai.webp` | Co-brand logo in the footer | From the design |
 | `og-default.jpg` | Link preview on WhatsApp/Facebook (1200×630) | Built from the logos |
-| `hero-rider.webp` | Rider cut-out beside the home sign-up form (desktop), transparent, about 868×1530 | **Still needed** |
+| `hero-rider.webp` | Rider cut-out beside the home sign-up form (desktop) | From the design |
+| `tbr-semalaya.webp` | "The Bikers Ranger SeMalaya" title art in the home hero | From the design |
+| `texture-dark.webp`, `texture-yellow.webp`, `ripped-edge.svg` | Page texture, yellow brush band and its torn edge | From the design |
+| `pitstop-event.webp` | Default picture for a pit stop without its own photo | From the design |
 | `favicon.svg` | Browser tab icon, square | **Placeholder** |
 | `apple-touch-icon.png` | Home-screen icon, 180×180 PNG | **Placeholder** |
 
@@ -196,7 +201,8 @@ More admins: sign up normally, then run in the database
 - [ ] `https://DOMAIN/sitemap.xml` lists the pages
 - [ ] Demo pit stop dates replaced with the real tour
 - [ ] Admin password stored safely; the seed output is gone from the terminal history
-- [ ] Rider image and real favicon added (section 5)
+- [ ] Real favicon added (section 5)
+- [ ] Huat Motor photo uploaded in *Admin → Port Rider* (the design had none)
 - [ ] Test sign-up, login, pit stop booking and password reset on a phone
 - [ ] Password reset email arrives in the inbox, not spam (section 4)
 - [ ] Submit the sitemap in Google Search Console

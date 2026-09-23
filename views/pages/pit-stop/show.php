@@ -28,7 +28,7 @@ $closedReason = match (true) {
 <section class="event-hero" aria-labelledby="page-title">
     <div class="container event-hero__grid">
         <div class="event-hero__media">
-            <img src="<?= e(uploaded($event['banner_image'] ?? null)) ?>" alt="" width="640" height="416" fetchpriority="high">
+            <img src="<?= e(uploaded($event['banner_image'] ?? null, asset('img/pitstop-event.webp'))) ?>" alt="" width="640" height="416" fetchpriority="high">
         </div>
         <div class="event-hero__body">
             <p class="section-heading__eyebrow">Pit Stop</p>

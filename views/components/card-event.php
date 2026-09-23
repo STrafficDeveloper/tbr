@@ -17,7 +17,7 @@ $timestamp = strtotime((string) $event['starts_at']);
 ?>
 <article class="card card--event">
     <div class="card__media">
-        <img src="<?= e(uploaded($event['banner_image'] ?? null)) ?>" alt=""
+        <img src="<?= e(uploaded($event['banner_image'] ?? null, asset('img/pitstop-event.webp'))) ?>" alt=""
              loading="lazy" decoding="async" width="400" height="260">
     </div>
     <div class="card__body">

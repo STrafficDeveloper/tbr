@@ -39,6 +39,8 @@ $points = [
 
     <div class="container hero__grid">
         <div class="hero__intro">
+            <img class="hero__brand" src="<?= e(asset('img/tbr-semalaya.webp')) ?>" alt="The Bikers Ranger SeMalaya"
+                 width="460" height="246" fetchpriority="high">
             <h1 class="hero__title" id="hero-title"><?= e($site->setting('home_hero_title', (string) Config::get('site.tagline'))) ?></h1>
 <?php if ($stats !== []): ?>
             <ul class="stats" aria-label="The Bikers Ranger dalam angka">
