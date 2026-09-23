@@ -26,7 +26,7 @@ function asset(string $path): string
     return $path . '?v=' . $version;
 }
 
-function uploaded(?string $path, string $fallback = '/assets/img/placeholder.jpg'): string
+function uploaded(?string $path, string $fallback = '/assets/img/placeholder.svg'): string
 {
     if ($path === null || $path === '') {
         return $fallback;
@@ -35,13 +35,34 @@ function uploaded(?string $path, string $fallback = '/assets/img/placeholder.jpg
     return '/uploads/' . ltrim($path, '/');
 }
 
+/** The value a member typed before a failed submit, so the form is not wiped. */
 function old(string $key, string $default = ''): string
 {
-    $values = Session::get('_old', []);
+    $values = Session::getFlash('_old', []);
 
     return is_array($values) && isset($values[$key]) && is_string($values[$key])
         ? $values[$key]
         : $default;
+}
+
+/** The validation message for one field from the last failed submit. */
+function error(string $field): ?string
+{
+    $errors = Session::getFlash('_errors', []);
+
+    return is_array($errors) && isset($errors[$field]) ? (string) $errors[$field] : null;
+}
+
+function component(string $name, array $data = []): string
+{
+    return \App\Core\View::partial('components/' . $name, $data);
+}
+
+/** Inline reference to a symbol in the shared SVG sprite; decorative by default. */
+function icon(string $name, string $class = 'icon'): string
+{
+    return '<svg class="' . e($class) . '" aria-hidden="true" focusable="false">'
+        . '<use href="' . e(asset('img/icons.svg')) . '#' . e($name) . '"></use></svg>';
 }
 
 /** Formats a date for display in Bahasa Malaysia pages. */

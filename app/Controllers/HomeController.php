@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\Config;
 use App\Core\Controller;
 use App\Core\Request;
+use App\Services\Schema;
 
 final class HomeController extends Controller
 {
@@ -16,16 +17,8 @@ final class HomeController extends Controller
             ->setTitle('Komuniti Biker Malaysia')
             ->setDescription((string) Config::get('site.tagline'))
             ->setCanonical('/')
-            ->addJsonLd([
-                '@context' => 'https://schema.org',
-                '@type' => 'Organization',
-                'name' => Config::get('app.name'),
-                'url' => url('/'),
-                'logo' => url('/assets/img/logo-tbr.svg'),
-                'email' => Config::get('site.email'),
-                'telephone' => Config::get('site.phone'),
-                'parentOrganization' => ['@type' => 'Organization', 'name' => Config::get('site.company')],
-            ]);
+            ->addJsonLd(Schema::organization())
+            ->addJsonLd(Schema::website());
 
         return $this->view('pages/home', ['seo' => $seo]);
     }

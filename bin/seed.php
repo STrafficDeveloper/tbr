@@ -217,6 +217,33 @@ foreach ($sections as $i => [$heading, $body]) {
     );
 }
 
+// --- Promo banners shown above the footer --------------------------------
+Database::execute("DELETE FROM banners WHERE placement = 'global'");
+
+$banners = [
+    [
+        'Moh Lepak Sama Geng The Bikers Ranger',
+        'Satu jalan, satu minat. Jom lepak, sembang dan kongsi cerita tentang perjalanan engkorang. '
+            . 'Dari pengalaman atas jalan sampailah kisah di sebalik setiap ride, mesti ada cerita nak borak!',
+        '/daftar',
+        'Daftar Sekarang',
+    ],
+    [
+        'Tahniah Kepada Semua 100 Pemenang',
+        'Senarai penuh pemenang peraduan SNAP-JE-MENANG kini diumumkan. Semak nama anda sekarang!',
+        '/aktiviti/pemenang',
+        'Ketahui Lebih Lanjut',
+    ],
+];
+
+foreach ($banners as $i => [$title, $body, $link, $cta]) {
+    Database::insert(
+        'INSERT INTO banners (title, body, placement, link_url, cta_label, sort_order, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [$title, $body, 'global', $link, $cta, $i, 'published'],
+    );
+}
+
 // --- Editable site copy --------------------------------------------------
 $settings = [
     'home_hero_title' => 'Konvoi biker seluruh Malaysia. Dari komuniti jadi realiti.',

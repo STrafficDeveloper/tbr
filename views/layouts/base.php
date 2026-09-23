@@ -7,6 +7,8 @@ use App\Core\Seo;
 
 /** @var Seo $seo */
 /** @var string $content */
+/** @var bool $hidePromos set by pages where the promo strips would distract, e.g. forms */
+$hidePromos ??= false;
 ?>
 <!DOCTYPE html>
 <html lang="<?= e((string) Config::get('app.locale')) ?>">
@@ -19,7 +21,11 @@ use App\Core\Seo;
 <?= \App\Core\View::partial('partials/header') ?>
 
     <main id="main">
+<?= \App\Core\View::partial('partials/flash') ?>
 <?= $content ?>
+<?php if (!$hidePromos): ?>
+<?= \App\Core\View::partial('partials/promo-banners') ?>
+<?php endif; ?>
     </main>
 
 <?= \App\Core\View::partial('partials/footer') ?>

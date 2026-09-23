@@ -25,14 +25,23 @@ abstract class Controller
         }
     }
 
-    /** @param array<string,string> $values */
-    protected function withInput(array $values): void
+    /**
+     * Post/Redirect/Get on validation failure: the form is re-shown with the
+     * member's input and the messages, and a refresh cannot re-submit it.
+     *
+     * @param array<string,string> $errors
+     * @param array<string,string|null> $input never pass passwords here
+     */
+    protected function backWithErrors(string $path, array $errors, array $input = []): never
     {
-        Session::put('_old', $values);
+        Session::flash('_errors', $errors);
+        Session::flash('_old', $input);
+        Response::redirect($path);
     }
 
-    protected function clearInput(): void
+    protected function redirectWithStatus(string $path, string $message, string $type = 'success'): never
     {
-        Session::forget('_old');
+        Session::flash('_status', ['type' => $type, 'message' => $message]);
+        Response::redirect($path);
     }
 }

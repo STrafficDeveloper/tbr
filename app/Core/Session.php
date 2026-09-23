@@ -21,6 +21,11 @@ final class Session
         ]);
         session_name('tbr_session');
         session_start();
+
+        // Flash data written during the last request becomes readable now and
+        // expires at the end of this one, whether or not anything reads it.
+        $_SESSION['_flash_now'] = $_SESSION['_flash'] ?? [];
+        $_SESSION['_flash'] = [];
     }
 
     public static function get(string $key, mixed $default = null): mixed
@@ -38,18 +43,15 @@ final class Session
         unset($_SESSION[$key]);
     }
 
-    /** Store a value readable exactly once, on the next request. */
+    /** Store a value readable only on the next request. */
     public static function flash(string $key, mixed $value): void
     {
         $_SESSION['_flash'][$key] = $value;
     }
 
-    public static function pullFlash(string $key, mixed $default = null): mixed
+    public static function getFlash(string $key, mixed $default = null): mixed
     {
-        $value = $_SESSION['_flash'][$key] ?? $default;
-        unset($_SESSION['_flash'][$key]);
-
-        return $value;
+        return $_SESSION['_flash_now'][$key] ?? $default;
     }
 
     /** Rotates the session id so a fixated pre-login id cannot be reused. */

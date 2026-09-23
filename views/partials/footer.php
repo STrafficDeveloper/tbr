@@ -34,7 +34,7 @@ $site = Config::get('site');
 <?php foreach ($group['links'] as $platform => $link): ?>
                 <li>
                     <a href="<?= e($link['url']) ?>" rel="noopener noreferrer" target="_blank">
-                        <img src="/assets/img/icon-<?= e($platform) ?>.svg" alt="" width="24" height="24" loading="lazy">
+                        <?= icon($platform) ?>
                         <span><?= e($link['label']) ?></span>
                     </a>
                 </li>
