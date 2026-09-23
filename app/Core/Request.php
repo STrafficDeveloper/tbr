@@ -40,6 +40,14 @@ final class Request
         return $value === '' ? $default : $value;
     }
 
+    /** Untrimmed POST value, for passwords: spaces are part of the secret. */
+    public function raw(string $key): string
+    {
+        $value = $_POST[$key] ?? '';
+
+        return is_string($value) ? $value : '';
+    }
+
     public function has(string $key): bool
     {
         return isset($_POST[$key]) || isset($_GET[$key]);

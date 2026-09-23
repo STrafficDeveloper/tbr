@@ -105,6 +105,18 @@ function normalizePhone(string $phone): string
     return str_starts_with($digits, '0') ? '6' . $digits : $digits;
 }
 
+/** 60155588645 -> 015-5588645: the local format members recognise and type. */
+function displayPhone(?string $phone): string
+{
+    if ($phone === null || $phone === '') {
+        return '';
+    }
+
+    $local = str_starts_with($phone, '60') ? '0' . substr($phone, 2) : $phone;
+
+    return strlen($local) > 3 ? substr($local, 0, 3) . '-' . substr($local, 3) : $local;
+}
+
 /** Packs an IP address for the VARBINARY(16) audit columns. */
 function packIp(string $ip): ?string
 {
