@@ -117,6 +117,63 @@
         navigator.sendBeacon(link.getAttribute('data-view-beacon'), body);
     });
 
+    // Lightbox: the design's photo and video "pop up" views. Links point at the
+    // real photo / YouTube page, so without JS they still work; with JS they
+    // open in a <dialog> instead of leaving the page.
+    var lightbox = document.querySelector('[data-lightbox]');
+
+    if (lightbox && typeof lightbox.showModal === 'function') {
+        var stage = lightbox.querySelector('[data-lightbox-stage]');
+        var caption = lightbox.querySelector('[data-lightbox-caption]');
+
+        var openWith = function (node, text) {
+            stage.replaceChildren(node);
+            caption.textContent = text || '';
+            caption.hidden = !text;
+            lightbox.showModal();
+        };
+
+        document.addEventListener('click', function (event) {
+            var photo = event.target.closest('[data-lightbox-image]');
+            var video = event.target.closest('[data-video-id]');
+
+            if (photo) {
+                event.preventDefault();
+                var img = document.createElement('img');
+                img.src = photo.getAttribute('href');
+                img.alt = photo.querySelector('img') ? photo.querySelector('img').alt : '';
+                openWith(img, photo.getAttribute('data-caption'));
+            } else if (video && video.getAttribute('data-video-provider') === 'youtube') {
+                event.preventDefault();
+                var frame = document.createElement('iframe');
+                // youtube-nocookie: no tracking cookies until the visitor presses play.
+                frame.src = 'https://www.youtube-nocookie.com/embed/'
+                    + encodeURIComponent(video.getAttribute('data-video-id')) + '?autoplay=1&rel=0';
+                var cardTitle = video.closest('.card') ? video.closest('.card').querySelector('.card__title') : null;
+                frame.title = cardTitle ? cardTitle.textContent.trim() : 'Video';
+                frame.allow = 'autoplay; encrypted-media; picture-in-picture';
+                frame.allowFullscreen = true;
+                openWith(frame, '');
+            }
+        });
+
+        lightbox.querySelector('[data-lightbox-close]').addEventListener('click', function () {
+            lightbox.close();
+        });
+
+        // A click on the dimmed backdrop lands on the dialog itself: close.
+        lightbox.addEventListener('click', function (event) {
+            if (event.target === lightbox) {
+                lightbox.close();
+            }
+        });
+
+        // Emptying the stage stops a playing video instead of letting it run hidden.
+        lightbox.addEventListener('close', function () {
+            stage.replaceChildren();
+        });
+    }
+
     document.querySelectorAll('[data-submenu-toggle]').forEach(function (toggle) {
         toggle.addEventListener('click', function () {
             var submenu = document.getElementById(toggle.getAttribute('aria-controls'));

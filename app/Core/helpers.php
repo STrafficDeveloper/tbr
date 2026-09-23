@@ -97,6 +97,19 @@ function formatDate(?string $date, bool $withTime = false): string
     return $text . ', ' . date('g:i', $timestamp) . ' ' . $period;
 }
 
+/** "1 Okt – 31 Okt 2026", or with both years when a range crosses New Year. */
+function formatDateRange(string $start, string $end): string
+{
+    $startText = formatDate($start);
+    $endText = formatDate($end);
+
+    if (substr($start, 0, 4) === substr($end, 0, 4)) {
+        $startText = preg_replace('/\s\d{4}$/', '', $startText) ?? $startText;
+    }
+
+    return $startText . ' – ' . $endText;
+}
+
 /** Stores numbers as 60XXXXXXXXX, the international form WhatsApp links need. */
 function normalizePhone(string $phone): string
 {

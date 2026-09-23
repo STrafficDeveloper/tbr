@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Controllers\AktivitiController;
 use App\Controllers\AuthController;
+use App\Controllers\HallOfFameController;
 use App\Controllers\HomeController;
+use App\Controllers\PanasAtasJalanController;
 use App\Controllers\PasswordResetController;
 use App\Controllers\PitStopController;
 use App\Controllers\PortRiderController;
@@ -37,6 +40,23 @@ $router->get('/pit-stop/daftar', [PitStopController::class, 'showRegister']);
 $router->post('/pit-stop/daftar', [PitStopController::class, 'register']);
 $router->get('/pit-stop/daftar/berjaya', [PitStopController::class, 'confirmation']);
 $router->get('/pit-stop/{slug}', [PitStopController::class, 'show']);
+
+// Aktiviti TBR hub
+$router->get('/aktiviti/event', [AktivitiController::class, 'event']);
+$router->get('/aktiviti/galeri', [AktivitiController::class, 'galeri']);
+$router->get('/aktiviti/galeri/{slug}', [AktivitiController::class, 'album']);
+$router->get('/aktiviti/peraduan', [AktivitiController::class, 'peraduan']);
+$router->get('/aktiviti/peraduan/{slug}', [AktivitiController::class, 'contest']);
+$router->get('/aktiviti/pemenang', [AktivitiController::class, 'pemenang']);
+$router->get('/aktiviti/pemenang/{slug}', [AktivitiController::class, 'winners']);
+
+// Hall of Fame: each tab is its own URL
+$router->get('/hall-of-fame', [HallOfFameController::class, 'index']);
+$router->get('/hall-of-fame/{slug}', [HallOfFameController::class, 'biodata']);
+$router->get('/hall-of-fame/{slug}/konten', [HallOfFameController::class, 'content']);
+$router->get('/hall-of-fame/{slug}/galeri', [HallOfFameController::class, 'gallery']);
+
+$router->get('/panas-atas-jalan', [PanasAtasJalanController::class, 'index']);
 
 // Directory
 $router->get('/port-rider', [PortRiderController::class, 'index']);

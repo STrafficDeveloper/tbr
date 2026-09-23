@@ -132,17 +132,21 @@ final class Schema
     /** @param array<string,mixed> $video a videos row @return array<string,mixed> */
     public static function video(array $video): array
     {
-        $embedUrl = match ($video['provider'] ?? null) {
-            'youtube' => empty($video['video_id']) ? null : 'https://www.youtube.com/embed/' . $video['video_id'],
-            default => $video['video_url'] ?? null,
-        };
+        $isYoutube = ($video['provider'] ?? null) === 'youtube' && !empty($video['video_id']);
+        $embedUrl = $isYoutube
+            ? 'https://www.youtube.com/embed/' . rawurlencode((string) $video['video_id'])
+            : ($video['video_url'] ?? null);
+
+        // Google won't show a video result without a thumbnail; YouTube always has one.
+        $thumbnail = self::image($video['thumbnail'] ?? null)
+            ?? ($isYoutube ? 'https://i.ytimg.com/vi/' . rawurlencode((string) $video['video_id']) . '/hqdefault.jpg' : null);
 
         return self::clean([
             '@context' => self::CONTEXT,
             '@type' => 'VideoObject',
             'name' => $video['title'],
             'description' => $video['description'] ?? $video['title'],
-            'thumbnailUrl' => self::image($video['thumbnail'] ?? null),
+            'thumbnailUrl' => $thumbnail,
             'uploadDate' => self::isoDate($video['published_at'] ?? null),
             'duration' => empty($video['duration_seconds']) ? null : 'PT' . (int) $video['duration_seconds'] . 'S',
             'embedUrl' => $embedUrl,

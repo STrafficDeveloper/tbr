@@ -71,12 +71,18 @@ foreach ([['30', 'Destinasi'], ['12', 'Bulan'], ['2', 'Pax/Slot'], ['10+', 'Tahu
     );
 }
 
-// --- Gallery categories --------------------------------------------------
+// --- Galeri albums -------------------------------------------------------
+$albumText = 'Event Bike Show pada 9 Februari mendapat sambutan menggalakkan daripada komuniti biker. '
+    . 'Kumpulan gambar bike daripada komuniti bikers.';
+
 foreach (['Bike Paling Hensem', 'Bike Paling Meriah', 'Bike Paling Raya', 'Bike Paling Sempoi'] as $i => $name) {
-    upsert('gallery_categories', [
-        'name' => $name,
+    upsert('galleries', [
+        'title' => $name,
         'slug' => slugify($name),
+        'description' => $albumText,
         'sort_order' => $i,
+        'status' => 'published',
+        'published_at' => date('Y-m-d H:i:s'),
     ], 'slug');
 }
 
@@ -159,11 +165,23 @@ $prizes = [
     ['Tempat Ke-3', 'Barangan Komuniti TBR'],
 ];
 
+// Copy from the design's peraduan pop-up; one step per line of "rules".
+$eligibility = 'Terbuka kepada semua ahli Komuniti The Bikers Ranger yang layak. '
+    . 'Hantar penyertaan peraduan anda melalui WhatsApp sepanjang tempoh peraduan.';
+$steps = implode("\n", [
+    'Sediakan penyertaan anda: lengkapkan syarat peraduan yang diperlukan di WhatsApp.',
+    'Ambil gambar motosikal atau momen tunggangan anda dan beritahu kami sebab anda suka menjadi sebahagian daripada Komuniti The Bikers Ranger.',
+    'Hantar melalui WhatsApp: tekan butang di bawah dan hantar penyertaan anda.',
+]);
+
 foreach ($contests as [$title, $startsOn, $endsOn, $announceOn]) {
     $contestId = upsert('contests', [
         'title' => $title,
         'slug' => slugify($title),
         'tagline' => $tagline,
+        'eligibility' => $eligibility,
+        'rules' => $steps,
+        'whatsapp_message' => "Saya ingin menyertai peraduan {$title}.",
         'starts_on' => $startsOn,
         'ends_on' => $endsOn,
         'announce_on' => $announceOn,
@@ -172,11 +190,33 @@ foreach ($contests as [$title, $startsOn, $endsOn, $announceOn]) {
 
     Database::execute('DELETE FROM contest_prizes WHERE contest_id = ?', [$contestId]);
 
+    $prizeIds = [];
     foreach ($prizes as $i => [$rankLabel, $prizeName]) {
-        Database::insert(
+        $prizeIds[] = Database::insert(
             'INSERT INTO contest_prizes (contest_id, rank_label, prize_name, sort_order) VALUES (?, ?, ?, ?)',
             [$contestId, $rankLabel, $prizeName, $i],
         );
+    }
+
+    // Sample winners for the first round only, using the design's placeholder
+    // names. They stay hidden until the contest's announce_on date.
+    Database::execute('DELETE FROM contest_winners WHERE contest_id = ?', [$contestId]);
+
+    if ($title === 'SNAP-JE-MENANG 01') {
+        foreach ($prizeIds as $position => $prizeId) {
+            Database::insert(
+                'INSERT INTO contest_winners (contest_id, prize_id, name, bike, plate_masked, position, is_consolation, sort_order)
+                 VALUES (?, ?, ?, ?, ?, ?, 0, ?)',
+                [$contestId, $prizeId, 'Muhammad Danish bin Ahmad', 'Yamaha Y15ZR', 'V** **21', $position + 1, $position],
+            );
+        }
+
+        foreach (range(1, 5) as $n) {
+            Database::insert(
+                'INSERT INTO contest_winners (contest_id, name, is_consolation, sort_order) VALUES (?, ?, 1, ?)',
+                [$contestId, 'Ahmad Rizal', $n],
+            );
+        }
     }
 }
 
@@ -237,6 +277,20 @@ foreach ($sections as $i => [$heading, $body]) {
         'INSERT INTO hof_sections (hof_profile_id, heading, body, sort_order) VALUES (?, ?, ?, ?)',
         [$hofId, $heading, $body, $i],
     );
+}
+
+// The "Content" tab in the design: a teaser and a three-part interview.
+foreach (['Teaser', 'Interview Pt.1', 'Interview Pt.2', 'Interview Pt.3'] as $i => $title) {
+    upsert('videos', [
+        'title' => "Wazi Abdul Hamid: {$title}",
+        'slug' => 'wazi-abdul-hamid-' . slugify($title),
+        'section' => 'hall_of_fame',
+        'hof_profile_id' => $hofId,
+        'provider' => 'youtube',
+        'sort_order' => $i,
+        'status' => 'published',
+        'published_at' => date('Y-m-d H:i:s'),
+    ], 'slug');
 }
 
 // --- Promo banners shown above the footer --------------------------------

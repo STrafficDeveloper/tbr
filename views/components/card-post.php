@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Generic content card for activities, galleries and contests: image, title,
+ * Generic content card for gallery albums and contests: image, title,
  * short copy, an optional date line and the likes/views row. The title link
  * is stretched over the whole card so the card is one tap target.
  *
