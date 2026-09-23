@@ -14,14 +14,14 @@ use App\Core\Session;
  */
 $status = Session::getFlash('_signup_status');
 $member = Auth::user();
-$riderImage = is_file(BASE_PATH . '/public/assets/img/hero-rider.webp') ? '/assets/img/hero-rider.webp' : null;
+$riderImage = is_file(BASE_PATH . '/public/assets/img/hero-rider.webp') ? asset('img/hero-rider.webp') : null;
 $points = [
     'Jemputan diperlukan - tiada walk-in',
     'Maklumat lokasi & masa dihantar melalui WhatsApp',
     'Event komuniti - bukan race, bukan rally',
 ];
 ?>
-<section class="hero" aria-labelledby="hero-title">
+<section class="hero" id="tentang" aria-labelledby="hero-title">
 <?php if ($slides !== []): ?>
     <div class="hero__backdrop" data-hero-slides>
 <?php foreach ($slides as $i => $slide): ?>

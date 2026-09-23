@@ -24,11 +24,12 @@ use App\Core\Seo;
     <meta name="twitter:card" content="summary_large_image">
 
     <meta name="theme-color" content="#101010">
-    <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+    <link rel="icon" href="<?= e(asset('img/favicon.svg')) ?>" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="<?= e(asset('img/apple-touch-icon.png')) ?>">
 
     <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
 
 <?php foreach ($seo->jsonLd() as $schema): ?>
-    <script type="application/ld+json"><?= json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?></script>
+<?php // HEX_TAG turns < and > into </>, so a title containing "</script>" can't end the block early. ?>
+    <script type="application/ld+json"><?= json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
 <?php endforeach; ?>

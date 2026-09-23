@@ -53,6 +53,12 @@ final class LoginThrottle
             'INSERT INTO login_attempts (identifier, ip_address, succeeded) VALUES (?, ?, ?)',
             [$this->key($identifier), $this->ip($ip), (int) $succeeded],
         );
+
+        // Keep a month for investigating abuse, then let it go (PDPA: don't
+        // hold IP addresses longer than needed). Occasional, not every login.
+        if (random_int(1, 50) === 1) {
+            Database::execute('DELETE FROM login_attempts WHERE attempted_at < NOW() - INTERVAL 30 DAY');
+        }
     }
 
     public function windowMinutes(): int

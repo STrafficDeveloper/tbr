@@ -16,11 +16,14 @@ use App\Controllers\PasswordResetController;
 use App\Controllers\PitStopController;
 use App\Controllers\PortRiderController;
 use App\Controllers\ProfileController;
+use App\Controllers\SeoController;
 use App\Core\Router;
 
 /** @var Router $router */
 
 $router->get('/', [HomeController::class, 'index']);
+$router->get('/sitemap.xml', [SeoController::class, 'sitemap']);
+$router->get('/robots.txt', [SeoController::class, 'robots']);
 
 // Membership
 $router->get('/daftar', [AuthController::class, 'showSignup']);

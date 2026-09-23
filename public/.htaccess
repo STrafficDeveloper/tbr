@@ -1,5 +1,10 @@
 Options -Indexes
 
+# PHP settings file: never downloadable.
+<Files ".user.ini">
+    Require all denied
+</Files>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
@@ -26,4 +31,17 @@ Options -Indexes
     ExpiresByType image/png "access plus 1 year"
     ExpiresByType image/svg+xml "access plus 1 year"
     ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+    # asset() stamps each file with ?v=<modified time>, so a changed file gets
+    # a new URL: the old one can safely be cached for good.
+    <If "%{QUERY_STRING} =~ /^v=\d+$/">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </If>
+
+    # Uploaded images get random names and are never edited in place.
+    <If "%{REQUEST_URI} =~ m#^/uploads/#">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </If>
 </IfModule>

@@ -27,9 +27,9 @@ foreach ($site['socials'] as $group) {
     <div class="site-footer__inner">
         <div class="site-footer__brand">
             <div class="site-footer__lockup">
-                <img src="/assets/img/logo-tbr.svg" alt="The Bikers Ranger" width="120" height="36" loading="lazy">
+                <img src="<?= e(asset('img/logo-tbr.svg')) ?>" alt="The Bikers Ranger" width="120" height="36" loading="lazy">
                 <span class="site-footer__x" aria-hidden="true">x</span>
-                <img src="/assets/img/logo-raja-kapcai.svg" alt="Raja Kapcai" width="120" height="36" loading="lazy">
+                <img src="<?= e(asset('img/logo-raja-kapcai.svg')) ?>" alt="Raja Kapcai" width="120" height="36" loading="lazy">
             </div>
             <p class="site-footer__partnership"><?= e($site['partnership']) ?></p>
             <p class="site-footer__company"><?= e($site['company']) ?></p>

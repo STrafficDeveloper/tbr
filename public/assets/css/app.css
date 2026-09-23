@@ -2394,3 +2394,16 @@ h1.section-heading__title {
     color: var(--c-accent);
     font-size: var(--fs-lg);
 }
+
+.error-page__debug {
+    max-width: 100%;
+    margin-top: var(--sp-8);
+    padding: var(--sp-4);
+    overflow-x: auto;
+    border-radius: var(--radius);
+    background: var(--c-surface);
+    color: #ff8a8a;
+    font-size: var(--fs-xs);
+    text-align: left;
+    white-space: pre-wrap;
+}

@@ -1,0 +1,15 @@
+# Safety net for hosts where the whole project ends up inside public_html.
+# The right setup is to point the domain's document root at public/; if that
+# isn't possible, this sends every request into public/ so that .env, app/,
+# config/, database/ and storage/ can never be downloaded.
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Without mod_rewrite the above can't protect anything: refuse outright.
+<IfModule !mod_rewrite.c>
+    Require all denied
+</IfModule>

@@ -80,7 +80,13 @@ final class Router
     /** @return array<string,string>|null */
     private function match(string $pattern, string $path): ?array
     {
-        $regex = preg_replace('#\{([a-z_]+)\}#', '(?P<$1>[A-Za-z0-9_-]+)', $pattern);
+        // Quote the literal parts so "/sitemap.xml" means a real dot, not "any character".
+        $regex = '';
+        foreach (preg_split('#(\{[a-z_]+\})#', $pattern, -1, PREG_SPLIT_DELIM_CAPTURE) ?: [] as $part) {
+            $regex .= preg_match('#^\{([a-z_]+)\}$#', $part, $name) === 1
+                ? '(?P<' . $name[1] . '>[A-Za-z0-9_-]+)'
+                : preg_quote($part, '#');
+        }
 
         if (!preg_match('#^' . $regex . '$#', $path, $matches)) {
             return null;

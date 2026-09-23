@@ -31,7 +31,7 @@ $isActive = static function (array $item) use ($current): bool {
 <header class="site-header" data-header>
     <div class="site-header__bar">
         <a class="site-header__logo" href="/" aria-label="<?= e((string) Config::get('app.name')) ?> — Laman Utama">
-            <img src="/assets/img/logo-tbr.svg" alt="The Bikers Ranger" width="132" height="40">
+            <img src="<?= e(asset('img/logo-tbr.svg')) ?>" alt="The Bikers Ranger" width="132" height="40">
         </a>
 
         <nav class="site-nav" aria-label="Navigasi utama">

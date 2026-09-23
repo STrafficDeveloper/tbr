@@ -20,6 +20,7 @@ final class PasswordResetRepository
         $token = bin2hex(random_bytes(32));
 
         Database::execute('DELETE FROM password_resets WHERE user_id = ? AND used_at IS NULL', [$userId]);
+        Database::execute('DELETE FROM password_resets WHERE expires_at < NOW() - INTERVAL 1 DAY');
         Database::insert(
             'INSERT INTO password_resets (user_id, token_hash, expires_at)
              VALUES (?, ?, NOW() + INTERVAL ' . self::LIFETIME_MINUTES . ' MINUTE)',

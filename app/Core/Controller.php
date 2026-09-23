@@ -21,7 +21,12 @@ abstract class Controller
     {
         if (!Csrf::isValid($request->input(Csrf::fieldName()))) {
             http_response_code(419);
-            exit('Sesi telah tamat. Sila muat semula halaman dan cuba lagi.');
+            echo View::render('pages/errors/419', [
+                'seo' => (new Seo())->setTitle('Sesi Telah Tamat')->noIndex(),
+                'hidePromos' => true,
+                'backUrl' => Response::safeReferer('/'),
+            ]);
+            exit;
         }
     }
 

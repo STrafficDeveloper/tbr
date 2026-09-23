@@ -59,7 +59,7 @@ return [
     'aktiviti_tabs' => $aktivitiTabs,
 
     'footer_nav' => [
-        'TENTANG' => '/tentang',
+        'TENTANG' => '/#tentang', // no About page in the design yet: the home intro
         'STOP & TARIKH' => '/pit-stop',
         'DAFTAR' => '/#daftar',
         'RAKAM TOUR' => '/aktiviti/galeri',

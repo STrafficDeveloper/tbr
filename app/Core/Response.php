@@ -12,26 +12,29 @@ final class Response
         exit;
     }
 
-    /**
-     * Returns to the referring page on this site, filters and all. Only the
-     * path and query are reused, so a forged Referer can't send anyone away.
-     */
+    /** Returns to the referring page on this site, filters and all. */
     public static function back(string $fallback = '/', string $fragment = ''): never
     {
-        $referer = (string) ($_SERVER['HTTP_REFERER'] ?? '');
-        $parts = parse_url($referer);
+        self::redirect(self::safeReferer($fallback) . ($fragment !== '' ? '#' . rawurlencode($fragment) : ''));
+    }
+
+    /**
+     * The referring page's path and query, if it is on this site. Only those
+     * parts are reused, so a forged Referer can't send anyone elsewhere.
+     */
+    public static function safeReferer(string $fallback = '/'): string
+    {
+        $parts = parse_url((string) ($_SERVER['HTTP_REFERER'] ?? ''));
         // HTTP_HOST carries the port when it isn't 80/443, so compare like with like.
         $refererHost = is_array($parts) && isset($parts['host'])
             ? $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '')
             : null;
         $sameHost = $refererHost !== null && strcasecmp($refererHost, (string) ($_SERVER['HTTP_HOST'] ?? '')) === 0;
-        $path = $parts['path'] ?? '';
+        $path = is_array($parts) ? ($parts['path'] ?? '') : '';
 
-        $target = $sameHost && str_starts_with($path, '/') && !str_starts_with($path, '//')
+        return $sameHost && str_starts_with($path, '/') && !str_starts_with($path, '//')
             ? $path . (isset($parts['query']) ? '?' . $parts['query'] : '')
             : $fallback;
-
-        self::redirect($target . ($fragment !== '' ? '#' . rawurlencode($fragment) : ''));
     }
 
     public static function wantsJson(): bool
@@ -50,7 +53,7 @@ final class Response
     public static function notFound(): never
     {
         http_response_code(404);
-        echo View::render('pages/errors/404', ['seo' => (new Seo())->setTitle('Halaman Tidak Dijumpai')]);
+        echo View::render('pages/errors/404', ['seo' => (new Seo())->setTitle('Halaman Tidak Dijumpai')->noIndex()]);
         exit;
     }
 }

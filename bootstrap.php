@@ -13,9 +13,11 @@ require BASE_PATH . '/app/Core/helpers.php';
 App\Core\Env::load(BASE_PATH . '/.env');
 App\Core\Config::load(BASE_PATH . '/config');
 
+// Report everything; debug only decides whether it is shown or logged.
+error_reporting(E_ALL);
+
 if (App\Core\Config::get('app.debug') === true) {
     ini_set('display_errors', '1');
-    error_reporting(E_ALL);
 } else {
     ini_set('display_errors', '0');
     ini_set('log_errors', '1');
