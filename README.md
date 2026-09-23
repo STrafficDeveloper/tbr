@@ -131,21 +131,23 @@ this server to send for it:
 
 Send yourself a reset from `/lupa-kata-laluan` after launch to confirm it arrives.
 
-## 5. Brand assets still to add
+## 5. Brand assets
 
-These files are referenced by the templates. Until they exist the site uses
+These files are referenced by the templates. Missing ones fall back to
 text or placeholders.
 
-| File (in `public/assets/img/`) | Used for | Format |
+| File (in `public/assets/img/`) | Used for | Status |
 |---|---|---|
-| `logo-tbr.svg` | Header and footer logo | SVG, light version for a dark background |
-| `logo-raja-kapcai.svg` | Co-brand logo in the footer | SVG |
-| `hero-rider.webp` | Rider cut-out beside the home sign-up form (desktop) | WebP with transparency, about 434×765 (upload 868×1530 for sharp retina) |
-| `favicon.svg` | Browser tab icon (**placeholder** now) | Square SVG |
-| `apple-touch-icon.png` | Home-screen icon (**placeholder** now) | 180×180 PNG |
-| `og-default.jpg` | Link preview on WhatsApp/Facebook (**placeholder** now) | 1200×630 JPG |
+| `logo-tbr.webp` | Header and footer logo (light text, for dark backgrounds) | From the design |
+| `logo-tbr-dark.webp` | Logo with dark text, for a yellow/light background | From the design |
+| `logo-tbr.png` | Logo in Google's structured data | From the design |
+| `logo-raja-kapcai.webp` | Co-brand logo in the footer | From the design |
+| `og-default.jpg` | Link preview on WhatsApp/Facebook (1200×630) | Built from the logos |
+| `hero-rider.webp` | Rider cut-out beside the home sign-up form (desktop), transparent, about 868×1530 | **Still needed** |
+| `favicon.svg` | Browser tab icon, square | **Placeholder** |
+| `apple-touch-icon.png` | Home-screen icon, 180×180 PNG | **Placeholder** |
 
-Replace the file with the same name. No code changes are needed.
+Replace a file with one of the same name; no code changes are needed.
 
 ### Fonts
 
@@ -194,7 +196,7 @@ More admins: sign up normally, then run in the database
 - [ ] `https://DOMAIN/sitemap.xml` lists the pages
 - [ ] Demo pit stop dates replaced with the real tour
 - [ ] Admin password stored safely; the seed output is gone from the terminal history
-- [ ] Logos, rider image, favicon and share image uploaded (section 5)
+- [ ] Rider image and real favicon added (section 5)
 - [ ] Test sign-up, login, pit stop booking and password reset on a phone
 - [ ] Password reset email arrives in the inbox, not spam (section 4)
 - [ ] Submit the sitemap in Google Search Console

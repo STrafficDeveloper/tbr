@@ -22,7 +22,7 @@ final class Schema
             '@type' => 'Organization',
             'name' => Config::get('app.name'),
             'url' => url('/'),
-            'logo' => url('/assets/img/logo-tbr.svg'),
+            'logo' => url('/assets/img/logo-tbr.png'),
             'email' => Config::get('site.email'),
             'telephone' => Config::get('site.phone'),
             'parentOrganization' => ['@type' => 'Organization', 'name' => Config::get('site.company')],

@@ -252,6 +252,11 @@ p {
     margin-right: auto;
 }
 
+.site-header__logo img {
+    width: auto;
+    height: 46px;
+}
+
 /* Desktop nav and the inline auth links are hidden until there is room. */
 .site-nav,
 .site-header__auth {
@@ -385,6 +390,10 @@ p {
 }
 
 @media (min-width: 1100px) {
+    :root {
+        --header-h: 82px;
+    }
+
     .site-header__toggle,
     .mobile-nav {
         display: none;
@@ -397,6 +406,10 @@ p {
 
     .site-header__logo {
         margin-right: var(--sp-8);
+    }
+
+    .site-header__logo img {
+        height: 60px;
     }
 
     .site-nav {
@@ -502,6 +515,11 @@ p {
     display: flex;
     align-items: center;
     gap: var(--sp-3);
+}
+
+.site-footer__lockup img {
+    width: auto;
+    height: 56px;
 }
 
 .site-footer__x {
