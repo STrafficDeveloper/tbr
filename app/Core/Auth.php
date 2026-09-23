@@ -38,8 +38,8 @@ final class Auth
 
         $user = Database::selectOne(
             'SELECT id, name, email, phone, avatar_path, state, plate_no, role, status
-             FROM users WHERE id = ? AND status = "active" LIMIT 1',
-            [$id],
+             FROM users WHERE id = ? AND status = ? LIMIT 1',
+            [$id, 'active'],
         );
 
         if ($user === null) {

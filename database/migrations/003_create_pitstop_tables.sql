@@ -1,0 +1,48 @@
+CREATE TABLE pitstop_events (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(160) NOT NULL,
+    slug VARCHAR(180) NOT NULL,
+    state VARCHAR(40) NOT NULL,
+    location_name VARCHAR(180) NOT NULL,
+    address VARCHAR(255) NULL,
+    maps_url VARCHAR(500) NULL,
+    latitude DECIMAL(10, 7) NULL,
+    longitude DECIMAL(10, 7) NULL,
+    starts_at DATETIME NOT NULL,
+    ends_at DATETIME NULL,
+    capacity SMALLINT UNSIGNED NULL,
+    description TEXT NULL,
+    banner_image VARCHAR(255) NULL,
+    status ENUM('draft', 'published', 'closed') NOT NULL DEFAULT 'draft',
+    sort_order SMALLINT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_pitstop_events_slug (slug),
+    KEY idx_pitstop_events_listing (status, starts_at),
+    KEY idx_pitstop_events_state (state)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- consent_at / consent_ip are the PDPA audit trail for the tick box on the form.
+CREATE TABLE pitstop_registrations (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    event_id INT UNSIGNED NOT NULL,
+    user_id INT UNSIGNED NULL,
+    name VARCHAR(120) NOT NULL,
+    phone VARCHAR(30) NOT NULL,
+    email VARCHAR(190) NULL,
+    plate_no VARCHAR(20) NOT NULL,
+    state VARCHAR(40) NULL,
+    consent_pdpa TINYINT(1) NOT NULL DEFAULT 0,
+    consent_at DATETIME NULL,
+    consent_ip VARBINARY(16) NULL,
+    status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+    reviewed_at DATETIME NULL,
+    notes VARCHAR(500) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_pitstop_registration_plate (event_id, plate_no),
+    KEY idx_pitstop_registrations_status (status, created_at),
+    KEY idx_pitstop_registrations_user (user_id),
+    CONSTRAINT fk_pitstop_registrations_event FOREIGN KEY (event_id) REFERENCES pitstop_events (id) ON DELETE CASCADE,
+    CONSTRAINT fk_pitstop_registrations_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
