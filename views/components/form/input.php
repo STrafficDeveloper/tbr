@@ -14,6 +14,7 @@ declare(strict_types=1);
  * @var string|null $hint
  * @var string|null $autocomplete
  * @var string|null $inputmode
+ * @var string|null $autocapitalize e.g. "characters" for number plates
  * @var bool|null $required
  */
 $type ??= 'text';
@@ -21,6 +22,7 @@ $placeholder ??= null;
 $hint ??= null;
 $autocomplete ??= null;
 $inputmode ??= null;
+$autocapitalize ??= null;
 $required ??= false;
 
 $id = 'field-' . $name;
@@ -46,6 +48,9 @@ $describedBy = array_filter([
 <?php endif; ?>
 <?php if ($inputmode !== null): ?>
            inputmode="<?= e($inputmode) ?>"
+<?php endif; ?>
+<?php if ($autocapitalize !== null): ?>
+           autocapitalize="<?= e($autocapitalize) ?>"
 <?php endif; ?>
 <?php if ($describedBy !== []): ?>
            aria-describedby="<?= e(implode(' ', $describedBy)) ?>"

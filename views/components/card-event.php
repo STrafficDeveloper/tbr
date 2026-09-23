@@ -21,7 +21,7 @@ $timestamp = strtotime((string) $event['starts_at']);
              loading="lazy" decoding="async" width="400" height="260">
     </div>
     <div class="card__body">
-        <h3 class="card__title"><?= e($event['title']) ?></h3>
+        <h3 class="card__title"><a href="/pit-stop/<?= e(rawurlencode((string) $event['slug'])) ?>"><?= e($event['title']) ?></a></h3>
         <p class="card__meta">
             <?= icon('calendar', 'icon icon--sm') ?>
             <time datetime="<?= e($timestamp === false ? '' : date('c', $timestamp)) ?>"><?= e(formatDate((string) $event['starts_at'], true)) ?></time>

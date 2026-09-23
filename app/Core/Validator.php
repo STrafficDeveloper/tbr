@@ -85,8 +85,9 @@ final class Validator
             'phone' => preg_match('/^(\+?60|0)[1-9][0-9]{7,9}$/', preg_replace('/[\s-]/', '', (string) $value) ?? '')
                 ? null
                 : "{$label} tidak sah. Contoh: 012-3456789.",
+            // Checked in stored form (see normalizePlate), so spacing and case don't matter.
             // Letters up to 10 cover special series such as PUTRAJAYA 1.
-            'plate' => preg_match('/^[A-Z]{1,10}\s?[0-9]{1,4}\s?[A-Z]{0,2}$/', strtoupper((string) $value))
+            'plate' => preg_match('/^[A-Z]{1,10}[0-9]{1,4}[A-Z]{0,2}$/', normalizePlate((string) $value))
                 ? null
                 : "{$label} tidak sah. Contoh: WXY 1234.",
             'confirmed' => $value === ($this->data[$field . '_confirmation'] ?? null)

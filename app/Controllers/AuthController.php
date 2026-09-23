@@ -107,6 +107,13 @@ final class AuthController extends Controller
 
         Auth::login($userId);
 
+        // Came here from a page that needs an account (e.g. pit stop booking)? Go back to it.
+        $intended = Auth::pullIntendedUrl('');
+
+        if ($intended !== '') {
+            $this->redirectWithStatus($intended, 'Tahniah, anda kini ahli The Bikers Ranger! Teruskan pendaftaran anda.');
+        }
+
         $this->backToSignup('success', 'Tahniah, pendaftaran berjaya! Jemputan pit stop akan dihantar melalui WhatsApp.');
     }
 

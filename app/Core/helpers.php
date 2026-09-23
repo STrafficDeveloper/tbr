@@ -117,6 +117,15 @@ function displayPhone(?string $phone): string
     return strlen($local) > 3 ? substr($local, 0, 3) . '-' . substr($local, 3) : $local;
 }
 
+/**
+ * "wxy 1234", "WXY1234" and "Wxy  1234" are the same bike: store one form,
+ * uppercase with no spaces, so the one-plate-per-event rule can't be dodged.
+ */
+function normalizePlate(string $plate): string
+{
+    return strtoupper(preg_replace('/\s+/', '', $plate) ?? '');
+}
+
 /** Packs an IP address for the VARBINARY(16) audit columns. */
 function packIp(string $ip): ?string
 {

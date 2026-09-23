@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Controllers\AuthController;
 use App\Controllers\HomeController;
 use App\Controllers\PasswordResetController;
+use App\Controllers\PitStopController;
 use App\Controllers\PortRiderController;
 use App\Controllers\ProfileController;
 use App\Core\Router;
@@ -28,6 +29,14 @@ $router->post('/reset-kata-laluan/{token}', [PasswordResetController::class, 're
 $router->get('/tetapan', [ProfileController::class, 'show']);
 $router->post('/tetapan', [ProfileController::class, 'update']);
 $router->post('/tetapan/gambar', [ProfileController::class, 'updateAvatar']);
+
+// Pit stops. The fixed /daftar paths must come before /{slug}, which would
+// otherwise treat "daftar" as an event slug.
+$router->get('/pit-stop', [PitStopController::class, 'index']);
+$router->get('/pit-stop/daftar', [PitStopController::class, 'showRegister']);
+$router->post('/pit-stop/daftar', [PitStopController::class, 'register']);
+$router->get('/pit-stop/daftar/berjaya', [PitStopController::class, 'confirmation']);
+$router->get('/pit-stop/{slug}', [PitStopController::class, 'show']);
 
 // Directory
 $router->get('/port-rider', [PortRiderController::class, 'index']);

@@ -19,7 +19,7 @@ use App\Core\View;
  */
 ?>
 <?= View::partial('pages/home/hero', ['site' => $site, 'slides' => $heroSlides, 'stats' => $stats]) ?>
-<?= View::partial('pages/home/gathering', ['site' => $site]) ?>
+<?= View::partial('partials/gathering', ['site' => $site]) ?>
 <?= View::partial('pages/home/sponsors', ['banners' => $sponsorBanners]) ?>
 <?= View::partial('pages/home/highlights', ['events' => $events]) ?>
 <?= View::partial('pages/home/port-rider', ['places' => $portRiders, 'states' => $portRiderStates, 'likedIds' => $likedPlaceIds]) ?>
