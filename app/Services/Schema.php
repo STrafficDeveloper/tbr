@@ -184,7 +184,13 @@ final class Schema
 
     private static function image(?string $upload): ?string
     {
-        return $upload === null || $upload === '' ? null : url(uploaded($upload));
+        if ($upload === null || $upload === '') {
+            return null;
+        }
+
+        $src = uploaded($upload);
+
+        return str_starts_with($src, 'http') ? $src : url($src);
     }
 
     private static function isoDate(?string $value): ?string

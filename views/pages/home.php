@@ -2,17 +2,25 @@
 
 declare(strict_types=1);
 
-use App\Core\Config;
+use App\Core\View;
+
+/**
+ * Sections run in the same order as the approved desktop design.
+ *
+ * @var \App\Repositories\SiteRepository $site
+ * @var list<array<string,mixed>> $heroSlides
+ * @var list<array<string,mixed>> $sponsorBanners
+ * @var list<array{value:string,label:string}> $stats
+ * @var list<array<string,mixed>> $events
+ * @var list<array<string,mixed>> $portRiders
+ * @var list<string> $portRiderStates
+ * @var array<string,mixed>|null $hero
+ * @var array<string,mixed>|null $featuredVideo
+ */
 ?>
-<section class="hero">
-    <div class="container hero__inner">
-        <h1 class="hero__title"><?= e((string) Config::get('site.tagline')) ?></h1>
-        <p class="hero__lead">
-            Satu jalan, satu minat. Jom lepak, sembang dan kongsi cerita tentang perjalanan engkorang.
-        </p>
-        <div class="hero__actions">
-            <a class="btn btn--primary" href="/pit-stop/daftar">Daftar Sekarang</a>
-            <a class="btn btn--ghost" href="/port-rider">Cari Port Rider</a>
-        </div>
-    </div>
-</section>
+<?= View::partial('pages/home/hero', ['site' => $site, 'slides' => $heroSlides, 'stats' => $stats]) ?>
+<?= View::partial('pages/home/gathering', ['site' => $site]) ?>
+<?= View::partial('pages/home/sponsors', ['banners' => $sponsorBanners]) ?>
+<?= View::partial('pages/home/highlights', ['events' => $events]) ?>
+<?= View::partial('pages/home/port-rider', ['places' => $portRiders, 'states' => $portRiderStates]) ?>
+<?= View::partial('pages/home/features', ['hero' => $hero, 'video' => $featuredVideo]) ?>

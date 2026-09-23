@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 use App\Core\Env;
 
+// Shared by the AKTIVITI TBR dropdown and the tab bar on the hub and home page.
+$aktivitiTabs = [
+    ['label' => 'Event', 'url' => '/aktiviti/event'],
+    ['label' => 'Galeri', 'url' => '/aktiviti/galeri'],
+    ['label' => 'Peraduan', 'url' => '/aktiviti/peraduan'],
+    ['label' => 'Pemenang', 'url' => '/aktiviti/pemenang'],
+];
+
 return [
     'tagline' => 'Konvoi biker seluruh Malaysia. Dari komuniti jadi realiti.',
     'partnership' => 'The Bikers Ranger x Raja Kapcai "Ukhwah Bikers, Seantero Dunia"',
@@ -38,12 +46,7 @@ return [
         [
             'label' => 'AKTIVITI TBR',
             'url' => '/aktiviti/event',
-            'children' => [
-                ['label' => 'Event', 'url' => '/aktiviti/event'],
-                ['label' => 'Galeri', 'url' => '/aktiviti/galeri'],
-                ['label' => 'Peraduan', 'url' => '/aktiviti/peraduan'],
-                ['label' => 'Pemenang', 'url' => '/aktiviti/pemenang'],
-            ],
+            'children' => $aktivitiTabs,
         ],
         ['label' => 'PANAS ATAS JALAN', 'url' => '/panas-atas-jalan'],
         ['label' => 'PIT STOP REGISTRATION', 'url' => '/pit-stop/daftar'],
@@ -51,10 +54,12 @@ return [
         ['label' => 'PORT RIDER', 'url' => '/port-rider'],
     ],
 
+    'aktiviti_tabs' => $aktivitiTabs,
+
     'footer_nav' => [
         'TENTANG' => '/tentang',
         'STOP & TARIKH' => '/pit-stop',
-        'DAFTAR' => '/daftar',
+        'DAFTAR' => '/#daftar',
         'RAKAM TOUR' => '/aktiviti/galeri',
     ],
 

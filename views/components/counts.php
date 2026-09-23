@@ -10,6 +10,11 @@ declare(strict_types=1);
  * @var int|null $views
  */
 $views ??= null;
+
+// A row of zeros reads as broken; show nothing until there is something to count.
+if ($likes === 0 && !$views) {
+    return;
+}
 ?>
 <ul class="counts">
     <li class="counts__item">

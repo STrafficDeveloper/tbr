@@ -1,7 +1,7 @@
 /* ==========================================================================
    The Bikers Ranger — global stylesheet
    Mobile-first. Section order: tokens, reset, utilities, header, mobile nav,
-   footer, page sections, then shared components (cards, forms, etc.).
+   footer, shared components (cards, forms, etc.), then page sections.
    ========================================================================== */
 
 /* --- Design tokens ------------------------------------------------------ */
@@ -571,41 +571,6 @@ p {
     }
 }
 
-/* --- Hero --------------------------------------------------------------- */
-.hero {
-    padding-block: var(--sp-16) var(--sp-12);
-}
-
-.hero__title {
-    max-width: 18ch;
-    font-size: var(--fs-3xl);
-}
-
-.hero__lead {
-    max-width: 52ch;
-    margin-top: var(--sp-6);
-    color: var(--c-muted);
-    font-size: var(--fs-lg);
-}
-
-.hero__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-4);
-    margin-top: var(--sp-8);
-}
-
-/* --- Error pages -------------------------------------------------------- */
-.error-page {
-    padding-block: var(--sp-24);
-    text-align: center;
-}
-
-.error-page p {
-    margin-block: var(--sp-4) var(--sp-8);
-    color: var(--c-muted);
-}
-
 /* ==========================================================================
    Shared components
    ========================================================================== */
@@ -1134,4 +1099,426 @@ h1.section-heading__title {
     height: 22px;
     margin-top: 1px;
     accent-color: var(--c-accent);
+}
+
+/* ==========================================================================
+   Page sections (after components, so they can adjust them)
+   ========================================================================== */
+
+/* --- Home: hero --------------------------------------------------------- */
+/* Anchors such as /#daftar land below the sticky header, not under it. */
+[id] {
+    scroll-margin-top: calc(var(--header-h) + var(--sp-4));
+}
+
+.hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-block: var(--sp-12) var(--sp-16);
+    background:
+        radial-gradient(circle at 20% 20%, rgba(234, 184, 17, 0.16), transparent 55%),
+        linear-gradient(180deg, #1c1c1c, var(--c-black));
+}
+
+.hero__backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+}
+
+/* A dark scrim keeps the white headline readable over any photo. */
+.hero__backdrop::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(16, 16, 16, 0.9) 0%, rgba(16, 16, 16, 0.55) 60%, rgba(16, 16, 16, 0.8) 100%);
+}
+
+.hero__slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 1s var(--ease);
+}
+
+.hero__slide.is-active {
+    opacity: 1;
+}
+
+.hero__slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero__grid {
+    position: relative;
+    display: grid;
+    gap: var(--sp-12);
+}
+
+.hero__title {
+    max-width: 14ch;
+    font-size: var(--fs-3xl);
+}
+
+.hero__rider {
+    display: none;
+}
+
+.hero__points {
+    display: grid;
+    gap: var(--sp-2);
+    margin-top: var(--sp-6);
+    font-size: var(--fs-sm);
+}
+
+.hero__points li {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+}
+
+.hero__points .icon {
+    color: var(--c-accent);
+}
+
+@media (min-width: 1100px) {
+    .hero {
+        padding-block: var(--sp-16) var(--sp-24);
+    }
+
+    .hero__grid {
+        grid-template-columns: 1fr minmax(0, 504px);
+        align-items: start;
+    }
+
+    .hero__intro {
+        padding-top: var(--sp-24);
+    }
+
+    /* The cut-out sits between the headline and the form, as in the design. */
+    .hero__rider {
+        position: absolute;
+        bottom: calc(var(--sp-24) * -1);
+        left: 31%;
+        display: block;
+        width: 34%;
+        max-width: 434px;
+        pointer-events: none;
+    }
+
+    .hero__signup {
+        position: relative;
+        z-index: 1;
+    }
+}
+
+/* --- Home: stats row ---------------------------------------------------- */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    justify-content: start;
+    gap: var(--sp-6);
+    margin-top: var(--sp-8);
+}
+
+.stats__item {
+    display: grid;
+}
+
+.stats__value {
+    color: var(--c-accent);
+    font-family: var(--font-display);
+    font-size: var(--fs-2xl);
+    line-height: 1;
+}
+
+.stats__label {
+    margin-top: var(--sp-1);
+    color: var(--c-muted);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* --- Home: sign-up card ------------------------------------------------- */
+.signup-card {
+    padding: var(--sp-6);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    background: rgba(26, 26, 26, 0.92);
+    backdrop-filter: blur(6px);
+}
+
+@media (min-width: 768px) {
+    .signup-card {
+        padding: var(--sp-8);
+    }
+}
+
+.signup-card__title {
+    font-size: var(--fs-xl);
+}
+
+.signup-card__lead {
+    margin-block: var(--sp-2) var(--sp-6);
+    color: var(--c-muted);
+    font-size: var(--fs-sm);
+}
+
+.signup-card__form {
+    gap: var(--sp-4);
+}
+
+.signup-card__consents {
+    display: grid;
+    gap: var(--sp-3);
+    padding: 0;
+    border: 0;
+}
+
+.signup-card__submit {
+    width: 100%;
+}
+
+.signup-card__privacy {
+    color: var(--c-muted);
+    font-size: var(--fs-xs);
+    text-align: center;
+}
+
+.signup-card__status {
+    margin-bottom: var(--sp-6);
+    padding: var(--sp-3) var(--sp-4);
+    border-left: 4px solid var(--c-accent);
+    border-radius: var(--radius);
+    background: rgba(234, 184, 17, 0.12);
+    font-weight: 600;
+}
+
+.signup-card__status--error {
+    border-left-color: #ff5a5a;
+    background: rgba(255, 90, 90, 0.12);
+}
+
+/* Honeypot: off-screen rather than display:none, which some bots detect. */
+.hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* --- Home: gathering band ----------------------------------------------- */
+.gathering {
+    padding-block: var(--sp-16);
+    background:
+        repeating-linear-gradient(135deg, rgba(16, 16, 16, 0.05) 0 2px, transparent 2px 12px),
+        var(--c-yellow);
+    color: var(--c-black);
+    text-align: center;
+}
+
+.gathering__title {
+    font-size: var(--fs-3xl);
+}
+
+.gathering__highlight {
+    display: block;
+    color: var(--c-white);
+    -webkit-text-stroke: 1.5px var(--c-black);
+    paint-order: stroke fill;
+}
+
+.gathering__features {
+    display: grid;
+    gap: var(--sp-6);
+    max-width: 930px;
+    margin: var(--sp-12) auto 0;
+    text-align: left;
+}
+
+.gathering__feature {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-4);
+}
+
+.gathering__icon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--c-black);
+    color: var(--c-yellow);
+}
+
+.gathering__icon .icon {
+    width: 28px;
+    height: 28px;
+}
+
+.gathering__feature-title {
+    margin-bottom: var(--sp-1);
+    font-size: var(--fs-lg);
+}
+
+@media (min-width: 768px) {
+    .gathering {
+        padding-block: var(--sp-24);
+    }
+
+    .gathering__features {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* --- Home: sponsors ----------------------------------------------------- */
+.sponsors {
+    padding-top: var(--sp-16);
+}
+
+.sponsors__list {
+    display: grid;
+    gap: var(--sp-6);
+    max-width: calc(1064px + var(--gutter) * 2);
+}
+
+.sponsors__item {
+    display: block;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+}
+
+.sponsors__item img {
+    width: 100%;
+}
+
+/* --- Rails: grids that become swipeable rows on small screens ----------- */
+@media (max-width: 767px) {
+    .grid.grid--rail {
+        display: flex;
+        gap: var(--sp-4);
+        margin-inline: calc(var(--gutter) * -1);
+        padding-inline: var(--gutter);
+        padding-bottom: var(--sp-2);
+        overflow-x: auto;
+        scroll-padding-inline: var(--gutter);
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .grid--rail::-webkit-scrollbar {
+        display: none;
+    }
+
+    .grid--rail > * {
+        flex: 0 0 80%;
+        scroll-snap-align: start;
+    }
+}
+
+@media (min-width: 1100px) {
+    .grid.grid--rail {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.card__cta {
+    width: 100%;
+    margin-top: auto;
+}
+
+.card--event .card__body {
+    gap: var(--sp-3);
+}
+
+/* --- Feature block (image + card) --------------------------------------- */
+.feature {
+    display: grid;
+    overflow: hidden;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    background: var(--c-surface);
+}
+
+.feature__media {
+    aspect-ratio: 614 / 535;
+    background: var(--c-black);
+}
+
+.feature__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.feature__card {
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: var(--sp-4);
+    padding: var(--sp-8) var(--sp-6);
+}
+
+.feature__count {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    color: var(--c-muted);
+    font-size: var(--fs-sm);
+}
+
+.feature__eyebrow {
+    color: var(--c-accent);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.feature__title {
+    font-size: var(--fs-2xl);
+}
+
+.feature__text {
+    color: var(--c-muted);
+}
+
+@media (min-width: 768px) {
+    .feature {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .feature--reverse .feature__media {
+        order: 2;
+    }
+
+    .feature__card {
+        padding: var(--sp-12);
+    }
+}
+
+/* --- Listing pages ------------------------------------------------------ */
+.results-summary {
+    margin-bottom: var(--sp-6);
+    color: var(--c-muted);
+    font-size: var(--fs-sm);
+}
+
+/* --- Error pages -------------------------------------------------------- */
+.error-page {
+    padding-block: var(--sp-24);
+    text-align: center;
+}
+
+.error-page p {
+    margin-block: var(--sp-4) var(--sp-8);
+    color: var(--c-muted);
 }

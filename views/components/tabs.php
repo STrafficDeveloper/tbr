@@ -9,16 +9,22 @@ use App\Core\Request;
  * without JavaScript (Aktiviti TBR hub, Hall of Fame profile).
  *
  * @var list<array{label:string,url:string}> $items
- * @var string $label accessible name for the tab group
+ * @var string $label       accessible name for the tab group
+ * @var string|null $active url of the tab to highlight; defaults to the current page
  */
-$current = (new Request())->path();
+$path = (new Request())->path();
+$highlight = $active ?? $path;
 ?>
 <nav class="tabs" aria-label="<?= e($label) ?>">
     <ul class="tabs__list">
 <?php foreach ($items as $item): ?>
-<?php $active = $current === $item['url']; ?>
+<?php
+    $isHighlighted = $highlight === $item['url'];
+    // "page" only when the tab really is this page; a preview elsewhere is just "true".
+    $ariaCurrent = $item['url'] === $path ? 'page' : 'true';
+?>
         <li>
-            <a class="tabs__link<?= $active ? ' is-active' : '' ?>" href="<?= e($item['url']) ?>"<?= $active ? ' aria-current="page"' : '' ?>>
+            <a class="tabs__link<?= $isHighlighted ? ' is-active' : '' ?>" href="<?= e($item['url']) ?>"<?= $isHighlighted ? ' aria-current="' . $ariaCurrent . '"' : '' ?>>
                 <?= e($item['label']) ?>
             </a>
         </li>

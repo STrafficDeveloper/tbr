@@ -60,8 +60,15 @@ final class Router
         }
 
         if ($pathMatched) {
+            $allowed = [];
+            foreach ($this->routes as $route) {
+                if ($this->match($route['pattern'], $path) !== null) {
+                    $allowed[] = $route['method'];
+                }
+            }
+
             http_response_code(405);
-            header('Allow: GET, POST');
+            header('Allow: ' . implode(', ', array_unique($allowed)));
             echo 'Method Not Allowed';
 
             return;

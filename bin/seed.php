@@ -81,32 +81,54 @@ foreach (['Bike Paling Hensem', 'Bike Paling Meriah', 'Bike Paling Raya', 'Bike 
 }
 
 // --- Port Rider directory ------------------------------------------------
+// Listings are the ones named in the design's Selangor, Penang and Pahang frames.
 $portRiders = [
-    ['MOTOKTM (M) SDN BHD', 'bike_shop'],
-    ['Petronas SS4B Kelana Jaya', 'fuel'],
-    ['Hodaka Motoworld Sdn Bhd (PJCC)', 'bike_shop'],
-    ['Restoran Mak Uda Selera Timur', 'food'],
-    ['Kafe Tok Ali', 'food'],
-    ['EFORGE Petaling Jaya', 'pitstop'],
-    ['Shell Petaling Jaya', 'fuel'],
-    ['Best Bike Motors', 'bike_shop'],
+    ['MOTOKTM (M) SDN BHD', 'bike_shop', 'Petaling Jaya', 'selangor'],
+    ['Petronas SS4B Kelana Jaya', 'fuel', 'Petaling Jaya', 'selangor'],
+    ['Hodaka Motoworld Sdn Bhd (PJCC)', 'bike_shop', 'Petaling Jaya', 'selangor'],
+    ['Restoran Mak Uda Selera Timur', 'food', 'Petaling Jaya', 'selangor'],
+    ['Kafe Tok Ali', 'food', 'Petaling Jaya', 'selangor'],
+    ['EFORGE Petaling Jaya', 'pitstop', 'Petaling Jaya', 'selangor'],
+    ['Shell Petaling Jaya', 'fuel', 'Petaling Jaya', 'selangor'],
+    ['Best Bike Motors', 'bike_shop', 'Petaling Jaya', 'selangor'],
+    ['Superbike Petronas MotoExpert Workshop And Riding Gear Juru', 'bike_shop', 'Bukit Mertajam', 'pulau-pinang'],
+    ['Givi Point Penang', 'bike_shop', 'George Town', 'pulau-pinang'],
+    ['DC Biker Touring Motogear Specialist Shop', 'bike_shop', 'Kepala Batas', 'pulau-pinang'],
+    ['XIB LAB PENANG', 'bike_shop', 'Simpang Ampat', 'pulau-pinang'],
+    ['Honda Impian X - Chang Motor Co., Ltd.', 'bike_shop', 'George Town', 'pulau-pinang'],
+    ['Lim Motor Repair', 'bike_shop', 'George Town', 'pulau-pinang'],
+    ['Huat Motor', 'bike_shop', 'George Town', 'pulau-pinang'],
+    ["WHEELER'S", 'bike_shop', 'George Town', 'pulau-pinang'],
+    ['Bike World', 'bike_shop', 'Kuantan', 'pahang'],
+    ["Lemang To'ki", 'food', 'Bentong', 'pahang'],
+    ['Kopi Kamboh', 'food', 'Janda Baik', 'pahang'],
+    ['MGK RACING KUANTAN', 'bike_shop', 'Kuantan', 'pahang'],
+    ['Raub Durian Stall 570', 'food', 'Raub', 'pahang'],
+    ['Kopi Ladang', 'food', 'Janda Baik', 'pahang'],
+    ['Tanarimba', 'pitstop', 'Janda Baik', 'pahang'],
+    ['Seaba Seafood', 'food', 'Kuantan', 'pahang'],
 ];
 
-foreach ($portRiders as [$name, $category]) {
+foreach ($portRiders as [$name, $category, $city, $state]) {
     upsert('port_riders', [
         'name' => $name,
         'slug' => slugify($name),
         'category' => $category,
-        'city' => 'Petaling Jaya',
-        'state' => 'selangor',
+        'city' => $city,
+        'state' => $state,
         'status' => 'published',
     ], 'slug');
 }
 
 // --- Pit stop events -----------------------------------------------------
+// Demo dates, one stop a month; the admin replaces these with the real tour.
 $events = [
-    ['Pit Stop Penang', 'pulau-pinang', 'Penang', '2026-10-31 10:00:00'],
+    ['Pit Stop Penang', 'pulau-pinang', 'George Town', '2026-10-31 10:00:00'],
     ['Pit Stop Pahang', 'pahang', 'Kuantan', '2026-11-28 10:00:00'],
+    ['Pit Stop Perak', 'perak', 'Ipoh', '2026-12-19 10:00:00'],
+    ['Pit Stop Melaka', 'melaka', 'Bandar Hilir', '2027-01-23 10:00:00'],
+    ['Pit Stop Negeri Sembilan', 'negeri-sembilan', 'Seremban', '2027-02-20 10:00:00'],
+    ['Pit Stop Selangor', 'selangor', 'Petaling Jaya', '2027-03-27 10:00:00'],
 ];
 
 foreach ($events as $i => [$title, $state, $location, $startsAt]) {
@@ -225,7 +247,7 @@ $banners = [
         'Moh Lepak Sama Geng The Bikers Ranger',
         'Satu jalan, satu minat. Jom lepak, sembang dan kongsi cerita tentang perjalanan engkorang. '
             . 'Dari pengalaman atas jalan sampailah kisah di sebalik setiap ride, mesti ada cerita nak borak!',
-        '/daftar',
+        '/#daftar',
         'Daftar Sekarang',
     ],
     [
@@ -247,7 +269,8 @@ foreach ($banners as $i => [$title, $body, $link, $cta]) {
 // --- Editable site copy --------------------------------------------------
 $settings = [
     'home_hero_title' => 'Konvoi biker seluruh Malaysia. Dari komuniti jadi realiti.',
-    'home_hero_subtitle' => 'Bukan race. Bukan rally. Ini gathering.',
+    'home_gathering_title' => 'Bukan race. Bukan rally.',
+    'home_gathering_highlight' => 'Ini gathering.',
     'pitstop_intro' => 'Satu pitstop, banyak cerita, jom eratkan hubungan bersama!',
     'community_intro' => 'Satu jalan, satu minat. Jom lepak, sembang dan kongsi cerita tentang '
         . 'perjalanan engkorang. Dari pengalaman atas jalan sampailah kisah di sebalik setiap ride, '

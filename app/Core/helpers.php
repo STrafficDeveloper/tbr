@@ -32,6 +32,11 @@ function uploaded(?string $path, string $fallback = '/assets/img/placeholder.svg
         return $fallback;
     }
 
+    // Already a full URL (e.g. a YouTube thumbnail): use it as-is.
+    if (str_starts_with($path, 'https://') || str_starts_with($path, 'http://')) {
+        return $path;
+    }
+
     return '/uploads/' . ltrim($path, '/');
 }
 
@@ -65,16 +70,51 @@ function icon(string $name, string $class = 'icon'): string
         . '<use href="' . e(asset('img/icons.svg')) . '#' . e($name) . '"></use></svg>';
 }
 
-/** Formats a date for display in Bahasa Malaysia pages. */
-function formatDate(?string $date, string $format = 'j M Y'): string
+/** "31 Okt 2026" or "31 Okt 2026, 10:00 pagi", with Malay month names. */
+function formatDate(?string $date, bool $withTime = false): string
 {
-    if ($date === null || $date === '') {
+    $timestamp = $date === null || $date === '' ? false : strtotime($date);
+
+    if ($timestamp === false) {
         return '';
     }
 
-    $timestamp = strtotime($date);
+    $months = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogo', 'Sep', 'Okt', 'Nov', 'Dis'];
+    $text = date('j', $timestamp) . ' ' . $months[(int) date('n', $timestamp) - 1] . ' ' . date('Y', $timestamp);
 
-    return $timestamp === false ? '' : date($format, $timestamp);
+    if (!$withTime) {
+        return $text;
+    }
+
+    $hour = (int) date('G', $timestamp);
+    $period = match (true) {
+        $hour < 12 => 'pagi',
+        $hour < 14 => 'tengah hari',
+        $hour < 19 => 'petang',
+        default => 'malam',
+    };
+
+    return $text . ', ' . date('g:i', $timestamp) . ' ' . $period;
+}
+
+/** Stores numbers as 60XXXXXXXXX, the international form WhatsApp links need. */
+function normalizePhone(string $phone): string
+{
+    $digits = preg_replace('/\D/', '', $phone) ?? '';
+
+    return str_starts_with($digits, '0') ? '6' . $digits : $digits;
+}
+
+/** Packs an IP address for the VARBINARY(16) audit columns. */
+function packIp(string $ip): ?string
+{
+    if (filter_var($ip, FILTER_VALIDATE_IP) === false) {
+        return null;
+    }
+
+    $packed = inet_pton($ip);
+
+    return $packed === false ? null : $packed;
 }
 
 function formatCount(int $count): string

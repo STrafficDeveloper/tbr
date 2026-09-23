@@ -65,7 +65,7 @@ $isActive = static function (array $item) use ($current): bool {
 <?php else: ?>
             <a class="site-header__auth-link" href="/log-masuk">LOG MASUK</a>
             <span aria-hidden="true">|</span>
-            <a class="site-header__auth-link site-header__auth-link--cta" href="/daftar">DAFTAR JADI MEMBER</a>
+            <a class="site-header__auth-link site-header__auth-link--cta" href="/#daftar">DAFTAR JADI MEMBER</a>
 <?php endif; ?>
         </div>
 
@@ -102,10 +102,15 @@ $isActive = static function (array $item) use ($current): bool {
             <div class="mobile-nav__auth">
 <?php if (Auth::check()): ?>
                 <a href="/tetapan">PROFILE</a>
+                <span aria-hidden="true">|</span>
+                <form class="site-header__logout" method="post" action="/log-keluar">
+                    <?= \App\Core\Csrf::field() ?>
+                    <button type="submit">LOG KELUAR</button>
+                </form>
 <?php else: ?>
                 <a href="/log-masuk">LOG MASUK</a>
                 <span aria-hidden="true">|</span>
-                <a href="/daftar">DAFTAR JADI MEMBER</a>
+                <a href="/#daftar">DAFTAR JADI MEMBER</a>
 <?php endif; ?>
             </div>
         </nav>
