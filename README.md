@@ -184,6 +184,10 @@ itself, and it avoids sending visitors' IPs to a third party (PDPA).
 Sign in at `/log-masuk` with the admin account, then go to `/admin`.
 
 - **Pendaftaran:** pit stop bookings, with status changes and CSV export.
+  Anyone can book (no account needed); each booking gets a number like
+  `TBR-000042`. On the day, pick the pit stop, search the rider's number,
+  plate or name, and press **Tandakan hadir** to tick them in. The page
+  shows how many have arrived, and the CSV includes the attendance column.
 - **Ahli:** members. Suspending a member signs them out everywhere. Includes
   a WhatsApp export limited to members who opted in.
 - **Kandungan:** pit stops, Port Rider listings, gallery albums and photos,

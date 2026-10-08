@@ -410,6 +410,15 @@ $attach('banners', $iqos, 'image_mobile', 'sponsor-iqos-mobile.webp', 900);
 $attach('banners', ensureBanner('global', 'Moh Lepak Sama Geng The Bikers Ranger'), 'image_desktop', 'promo-moh-lepak.webp', 1200);
 $attach('banners', ensureBanner('global', 'Tahniah Kepada Semua 100 Pemenang'), 'image_desktop', 'promo-tahniah.webp', 1200);
 
+// Sponsor banner under the event / bike shop pop-ups. The design's body copy
+// is not legible, so this is placeholder text for the admin to replace.
+$popup = ensureBanner('popup', 'Geng Ini Peluang Korang!', [
+    'body' => 'Sertai peraduan komuniti The Bikers Ranger dan bawa pulang hadiah menarik.',
+    'link_url' => '/aktiviti/peraduan',
+    'cta_label' => 'Join Sekarang',
+]);
+$attach('banners', $popup, 'image_desktop', 'promo-tahniah.webp', 1200);
+
 // Port Rider shop photos, one file per listing slug.
 foreach (glob($media . 'port-rider/*.webp') ?: [] as $file) {
     $attach('port_riders', $idFor('port_riders', 'slug', basename($file, '.webp')), 'image', 'port-rider/' . basename($file), 1200);

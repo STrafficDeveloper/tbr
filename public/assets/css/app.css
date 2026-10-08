@@ -1476,6 +1476,9 @@ h1.section-heading__title {
 }
 
 .card__cta {
+    /* Above the title's stretched link, which opens the pop-up. */
+    position: relative;
+    z-index: 1;
     width: 100%;
     margin-top: auto;
 }
@@ -1728,42 +1731,6 @@ h1.section-heading__title {
     }
 }
 
-/* --- Like button (Port Rider cards) ------------------------------------- */
-.like-form {
-    display: contents;
-}
-
-.like-button {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-1);
-    min-height: 32px;
-    margin: calc(var(--sp-1) * -1) 0;
-    padding: var(--sp-1) var(--sp-2);
-    border-radius: 999px;
-    color: var(--c-muted);
-    font-size: var(--fs-sm);
-    transition: color 0.2s var(--ease), background-color 0.2s var(--ease);
-}
-
-.like-button:hover,
-.like-button:focus-visible {
-    background: rgba(234, 184, 17, 0.12);
-    color: var(--c-accent);
-}
-
-.like-button[aria-pressed="true"] {
-    color: var(--c-accent);
-}
-
-.like-button[aria-pressed="true"] .icon {
-    fill: currentColor;
-}
-
-.like-button:disabled {
-    opacity: 0.6;
-}
-
 /* --- Pit stop: single stop page ----------------------------------------- */
 .event-hero {
     padding-block: var(--sp-12);
@@ -1884,25 +1851,44 @@ h1.section-heading__title {
     gap: var(--sp-3);
 }
 
-.register-card__contact {
+.register-card__prefill {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     gap: var(--sp-2);
+    margin-bottom: var(--sp-6);
     padding: var(--sp-3) var(--sp-4);
     border-radius: var(--radius);
     background: rgba(255, 255, 255, 0.04);
     font-size: var(--fs-sm);
 }
 
-.register-card__contact .icon {
+.register-card__prefill .icon {
+    flex-shrink: 0;
     color: var(--c-accent);
 }
 
-.register-card__contact a {
+/* Confirmation: booking details, then where to go. */
+.summary__ref {
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    letter-spacing: 0.04em;
     color: var(--c-accent);
-    text-decoration: underline;
-    text-underline-offset: 3px;
+}
+
+.directions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
+    margin-block: var(--sp-6);
+}
+
+.directions__label {
+    width: 100%;
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .register-card__submit {
@@ -2129,6 +2115,69 @@ h1.section-heading__title {
     border-radius: 50%;
     background: rgba(16, 16, 16, 0.75);
     color: var(--c-white);
+}
+
+/* Event / bike shop pop-up: a card on the dimmed page, sponsor banner below. */
+.lightbox--detail {
+    width: min(100% - var(--sp-8), 680px);
+    background: transparent;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.detail {
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--c-surface);
+}
+
+.lightbox__stage .detail__media {
+    width: 100%;
+    max-height: none;
+    aspect-ratio: 16 / 10;
+    border-radius: 0;
+    object-fit: cover;
+}
+
+.detail__body {
+    display: grid;
+    gap: var(--sp-4);
+    padding: var(--sp-6);
+}
+
+.detail__title {
+    font-size: var(--fs-xl);
+}
+
+.detail__facts {
+    display: grid;
+    gap: var(--sp-2);
+}
+
+.detail__facts div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+}
+
+.detail__facts dt,
+.detail__label {
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.detail__facts dt::after {
+    content: ":";
+}
+
+.detail__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+}
+
+.lightbox__promo {
+    margin-top: var(--sp-4);
 }
 
 /* --- Peraduan detail ---------------------------------------------------- */

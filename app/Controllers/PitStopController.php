@@ -17,12 +17,14 @@ use App\Repositories\PitStopRegistrationRepository;
 use App\Repositories\PortRiderRepository;
 use App\Repositories\SiteRepository;
 use App\Services\Mailer;
+use App\Services\RateLimiter;
 use App\Services\Schema;
 use Throwable;
 
 final class PitStopController extends Controller
 {
     private const NEARBY_PLACES = 8;
+    private const BOOKINGS_PER_IP_PER_HOUR = 10;
 
     /** "Stop & Tarikh": the tour schedule the footer links to. */
     public function index(Request $request): string
@@ -79,7 +81,6 @@ final class PitStopController extends Controller
             'stateName' => $stateName,
             'isOpen' => PitStopEventRepository::isOpen($event),
             'places' => $places,
-            'likedIds' => PortRiderController::likedIdsFor($portRiders, $places),
             'site' => new SiteRepository(),
         ]);
     }
@@ -87,42 +88,57 @@ final class PitStopController extends Controller
     public function showRegister(Request $request): string
     {
         $member = Auth::user();
-        $selected = (string) ($request->input('acara') ?? '');
-
-        // Guests see why they need an account; after signing in or signing up
-        // they come straight back here with their chosen stop still selected.
-        if ($member === null) {
-            Session::put('_intended', '/pit-stop/daftar' . ($selected !== '' ? '?acara=' . rawurlencode($selected) : ''));
-        }
 
         $seo = $this->seo()
             ->setTitle('Pendaftaran Pit Stop')
-            ->setDescription('Daftar nombor plat motor anda untuk tempah slot pit stop The Bikers Ranger.')
+            ->setDescription('Isi maklumat anda dan nombor plat motor untuk tempah slot pit stop The Bikers Ranger.')
             ->setCanonical('/pit-stop/daftar');
 
         return $this->view('pages/pit-stop/register', [
             'seo' => $seo,
             'member' => $member,
-            'events' => $member === null ? [] : (new PitStopEventRepository())->openForRegistration(),
-            'selected' => $selected,
+            'events' => (new PitStopEventRepository())->openForRegistration(),
+            'selected' => (string) ($request->input('acara') ?? ''),
             'registrations' => $member === null ? [] : (new PitStopRegistrationRepository())->allForUser((int) $member['id']),
             'states' => Config::get('site.states', []),
         ]);
     }
 
+    /**
+     * Open to everyone: guests type their details; signed-in members get them
+     * pre-filled and their booking is linked to their account.
+     */
     public function register(Request $request): never
     {
-        Auth::requireLogin($request);
         $this->verifyCsrf($request);
 
-        $member = (array) Auth::user();
+        $selected = (string) ($request->input('event') ?? '');
+        $back = '/pit-stop/daftar' . ($selected !== '' ? '?acara=' . rawurlencode($selected) : '');
+
+        // Bots fill every field, including this one the form never shows.
+        if ($request->input('website') !== null) {
+            Response::redirect($back);
+        }
+
+        $limiter = new RateLimiter();
+        $bucket = RateLimiter::bucket('pitstop', $request->ip());
+
+        if ($limiter->tooManyAttempts($bucket, self::BOOKINGS_PER_IP_PER_HOUR, 3600)) {
+            $this->redirectWithStatus($back, 'Terlalu banyak pendaftaran dari rangkaian ini. Sila cuba lagi dalam masa sejam.', 'error');
+        }
 
         $validator = new Validator($_POST, [
+            'name' => 'required|max:120',
+            'phone' => 'required|phone',
+            'email' => 'required|email|max:190',
             'plate' => 'required|plate|max:20',
             'event' => 'required|max:180',
             'state' => 'in:' . implode(',', array_keys(Config::get('site.states', []))),
             'pdpa' => 'accepted',
         ], [
+            'name' => 'Nama penuh',
+            'phone' => 'Nombor telefon',
+            'email' => 'Alamat e-mel',
             'plate' => 'Nombor plat',
             'event' => 'Pit stop',
             'state' => 'Negeri',
@@ -130,31 +146,37 @@ final class PitStopController extends Controller
         ]);
 
         $data = $validator->validated();
-        $input = [
-            'plate' => $request->input('plate'),
-            'event' => $request->input('event'),
-            'state' => $request->input('state'),
-            'pdpa' => $request->has('pdpa') ? '1' : null,
-        ];
-        $back = '/pit-stop/daftar' . ($input['event'] !== null ? '?acara=' . rawurlencode($input['event']) : '');
+        $input = [];
+        foreach (['name', 'phone', 'email', 'plate', 'event', 'state'] as $field) {
+            $input[$field] = $request->input($field);
+        }
+        $input['pdpa'] = $request->has('pdpa') ? '1' : null;
 
         if (!$validator->passes()) {
             $this->backWithErrors($back, $validator->errors(), $input);
         }
 
+        $limiter->hit($bucket);
+        $memberId = Auth::id();
+
         try {
             $registrationId = (new PitStopRegistrationRepository())->register(
                 (string) $data['event'],
-                $member,
+                [
+                    'user_id' => $memberId,
+                    'name' => preg_replace('/\s+/', ' ', (string) $data['name']) ?? '',
+                    'phone' => normalizePhone((string) $data['phone']),
+                    'email' => strtolower((string) $data['email']),
+                ],
                 normalizePlate((string) $data['plate']),
-                $data['state'] ?? ($member['state'] ?? null),
+                $data['state'] ?? null,
                 packIp($request->ip()),
             );
         } catch (ValidationException $exception) {
             $this->backWithErrors($back, $exception->errors, $input);
         }
 
-        $this->sendConfirmation($registrationId, $member);
+        $this->sendConfirmation($registrationId);
 
         Session::flash('_registration_id', $registrationId);
         Response::redirect('/pit-stop/daftar/berjaya');
@@ -162,47 +184,56 @@ final class PitStopController extends Controller
 
     public function confirmation(Request $request): string
     {
-        Auth::requireLogin($request);
-
         $registrationId = Session::getFlash('_registration_id');
         $registration = is_int($registrationId)
-            ? (new PitStopRegistrationRepository())->findForUser($registrationId, (int) Auth::id())
+            ? (new PitStopRegistrationRepository())->findForConfirmation($registrationId)
             : null;
 
-        // Only reachable straight after a booking; a refresh or a shared link goes back to the form.
+        // Only reachable straight after a booking (the id lives in this
+        // browser's session); a refresh or a shared link goes back to the form.
         if ($registration === null) {
             Response::redirect('/pit-stop/daftar');
         }
 
-        $seo = $this->seo()->setTitle('Pendaftaran Diterima')->noIndex();
+        $seo = $this->seo()->setTitle('Pendaftaran Pit Stop Berjaya')->noIndex();
 
-        return $this->view('pages/pit-stop/confirmation', ['seo' => $seo, 'registration' => $registration]);
+        return $this->view('pages/pit-stop/confirmation', [
+            'seo' => $seo,
+            'registration' => $registration,
+            'directions' => directionLinks($registration),
+        ]);
     }
 
-    /** @param array<string,mixed> $member */
-    private function sendConfirmation(int $registrationId, array $member): void
+    private function sendConfirmation(int $registrationId): void
     {
-        $registration = (new PitStopRegistrationRepository())->findForUser($registrationId, (int) $member['id']);
+        $registration = (new PitStopRegistrationRepository())->findForConfirmation($registrationId);
 
-        if ($registration === null || empty($member['email'])) {
+        if ($registration === null || empty($registration['email'])) {
             return;
         }
 
         $siteName = (string) Config::get('app.name');
-        $body = "Hai {$member['name']},\n\n"
-            . "Terima kasih! Pendaftaran pit stop anda telah kami terima dan akan disemak.\n\n"
+        $body = "Hai {$registration['name']},\n\n"
+            . "Terima kasih! Pendaftaran pit stop anda telah kami terima.\n\n"
+            . 'Nombor pendaftaran: ' . self::reference((int) $registration['id']) . "\n"
             . "Pit stop: {$registration['title']}\n"
             . 'Tarikh: ' . formatDate((string) $registration['starts_at'], true) . "\n"
+            . "Lokasi: {$registration['location_name']}\n"
             . "Nombor plat: {$registration['plate_no']}\n\n"
-            . "Maklumat lokasi dan masa akan dihantar melalui WhatsApp setelah pendaftaran disahkan.\n"
-            . "Ingat: jemputan diperlukan, tiada walk-in.\n\n"
+            . "Ingat: jemputan diperlukan, tiada walk-in. Tunjukkan e-mel ini semasa tiba.\n\n"
             . "— {$siteName}\n";
 
         // The booking is already saved; a mail hiccup must not turn it into an error page.
         try {
-            (new Mailer())->send((string) $member['email'], "Pendaftaran pit stop diterima: {$registration['title']}", $body);
+            (new Mailer())->send((string) $registration['email'], "Pendaftaran pit stop berjaya: {$registration['title']}", $body);
         } catch (Throwable $exception) {
             error_log('Pit stop confirmation email failed: ' . $exception->getMessage());
         }
+    }
+
+    /** The number riders quote at the pit stop, e.g. TBR-000042. */
+    public static function reference(int $registrationId): string
+    {
+        return sprintf('TBR-%06d', $registrationId);
     }
 }

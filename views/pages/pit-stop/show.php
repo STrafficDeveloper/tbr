@@ -9,7 +9,6 @@ use App\Core\View;
  * @var string $stateName
  * @var bool $isOpen
  * @var list<array<string,mixed>> $places
- * @var list<int> $likedIds
  * @var \App\Repositories\SiteRepository $site
  */
 $timestamp = strtotime((string) $event['starts_at']);
@@ -57,7 +56,7 @@ $closedReason = match (true) {
 
 <?php if ($closedReason === null): ?>
             <a class="btn btn--primary" href="/pit-stop/daftar?acara=<?= e(rawurlencode((string) $event['slug'])) ?>">Ready Nak Ride? Daftar Slot</a>
-            <p class="event-hero__note">Jemputan diperlukan - tiada walk-in. Lokasi &amp; masa tepat dihantar melalui WhatsApp.</p>
+            <p class="event-hero__note">Jemputan diperlukan - tiada walk-in. Pengesahan dihantar melalui e-mel selepas mendaftar.</p>
 <?php else: ?>
             <p class="event-hero__closed" role="status"><?= e($closedReason) ?></p>
             <a class="btn btn--ghost" href="/pit-stop">Lihat pit stop lain</a>
@@ -80,7 +79,7 @@ $closedReason = match (true) {
         ]) ?>
         <div class="grid grid--rail">
 <?php foreach ($places as $placeRow): ?>
-            <?= component('card-port-rider', ['place' => $placeRow, 'liked' => in_array((int) $placeRow['id'], $likedIds, true)]) ?>
+            <?= component('card-port-rider', ['place' => $placeRow]) ?>
 <?php endforeach; ?>
         </div>
     </div>

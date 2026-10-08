@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Core\Config;
+use App\Core\Csrf;
 use App\Core\Seo;
 
 /** @var Seo $seo */
@@ -12,6 +13,7 @@ use App\Core\Seo;
     <title><?= e($seo->title()) ?></title>
     <meta name="description" content="<?= e($seo->description()) ?>">
     <meta name="robots" content="<?= e($seo->robots()) ?>">
+    <meta name="csrf-token" content="<?= e(Csrf::token()) ?>">
     <link rel="canonical" href="<?= e($seo->canonical()) ?>">
 
     <meta property="og:type" content="website">

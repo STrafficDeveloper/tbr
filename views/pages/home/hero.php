@@ -17,7 +17,7 @@ $member = Auth::user();
 $riderImage = is_file(BASE_PATH . '/public/assets/img/hero-rider.webp') ? asset('img/hero-rider.webp') : null;
 $points = [
     'Jemputan diperlukan - tiada walk-in',
-    'Maklumat lokasi & masa dihantar melalui WhatsApp',
+    'Maklumat lokasi & masa dihantar melalui e-mel',
     'Event komuniti - bukan race, bukan rally',
 ];
 ?>
@@ -74,7 +74,7 @@ $points = [
                 <a class="btn btn--primary signup-card__submit" href="/pit-stop/daftar">Daftar Slot Pit Stop</a>
 <?php else: ?>
                 <h2 class="signup-card__title">Daftar Slot Pitstop Anda Sekarang!</h2>
-                <p class="signup-card__lead">Isi maklumat di bawah untuk terima jemputan melalui WhatsApp</p>
+                <p class="signup-card__lead">Isi maklumat anda untuk menerima jemputan.</p>
 
                 <form class="form signup-card__form" method="post" action="/daftar">
                     <?= Csrf::field() ?>
@@ -83,7 +83,7 @@ $points = [
                         'placeholder' => 'cth: Ahmad bin Abdullah', 'autocomplete' => 'name']) ?>
                     <?= component('form/input', ['name' => 'phone', 'label' => 'Nombor Telefon', 'type' => 'tel',
                         'required' => true, 'placeholder' => 'cth: 015-558-8645', 'autocomplete' => 'tel',
-                        'inputmode' => 'tel', 'hint' => 'Nombor WhatsApp untuk terima jemputan.']) ?>
+                        'inputmode' => 'tel', 'hint' => 'Nombor yang boleh dihubungi (WhatsApp).']) ?>
                     <?= component('form/input', ['name' => 'email', 'label' => 'Alamat E-mel', 'type' => 'email',
                         'required' => true, 'placeholder' => 'cth: abu@example.com', 'autocomplete' => 'email']) ?>
                     <?= component('form/input', ['name' => 'password', 'label' => 'Kata Laluan', 'type' => 'password',

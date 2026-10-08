@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Core\Paginator;
-use App\Core\View;
 
 /**
  * @var list<array<string,mixed>> $videos
@@ -32,4 +31,3 @@ use App\Core\View;
 <?php endif; ?>
     </div>
 </section>
-<?= View::partial('partials/lightbox') ?>

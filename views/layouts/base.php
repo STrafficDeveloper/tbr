@@ -29,6 +29,7 @@ $hidePromos ??= false;
     </main>
 
 <?= \App\Core\View::partial('partials/footer') ?>
+<?= \App\Core\View::partial('partials/lightbox') ?>
 
     <script src="<?= e(asset('js/app.js')) ?>" defer></script>
 </body>

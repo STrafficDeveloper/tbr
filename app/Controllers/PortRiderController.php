@@ -4,22 +4,17 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Core\Auth;
 use App\Core\Config;
 use App\Core\Controller;
 use App\Core\Paginator;
 use App\Core\Request;
-use App\Core\Response;
 use App\Core\Session;
 use App\Repositories\PortRiderRepository;
-use App\Services\RateLimiter;
 use App\Services\Schema;
-use App\Services\Visitor;
 
 final class PortRiderController extends Controller
 {
     private const PER_PAGE = 12;
-    private const LIKES_PER_IP_PER_HOUR = 120;
 
     public function index(Request $request): string
     {
@@ -69,46 +64,12 @@ final class PortRiderController extends Controller
         return $this->view('pages/port-rider/index', [
             'seo' => $seo,
             'places' => $places,
-            'likedIds' => self::likedIdsFor($repository, $places),
             'paginator' => $paginator,
             'state' => $state,
             'stateLabel' => $stateLabel,
             'stateOptions' => $stateOptions,
             'term' => $term,
         ]);
-    }
-
-    /** Heart button. JSON for the in-page script, a redirect back without it. */
-    public function like(Request $request): never
-    {
-        $this->verifyCsrf($request);
-
-        $repository = new PortRiderRepository();
-        $place = $repository->findPublishedBySlug((string) $request->routeParam('slug'));
-
-        if ($place === null) {
-            Response::notFound();
-        }
-
-        $limiter = new RateLimiter();
-        $bucket = RateLimiter::bucket('like', $request->ip());
-
-        if ($limiter->tooManyAttempts($bucket, self::LIKES_PER_IP_PER_HOUR, 3600)) {
-            Response::wantsJson()
-                ? Response::json(['error' => 'Terlalu banyak cubaan. Sila cuba sebentar lagi.'], 429)
-                : Response::back('/port-rider', (string) $place['slug']);
-        }
-
-        $limiter->hit($bucket);
-
-        $userId = Auth::id();
-        $result = $repository->toggleLike((int) $place['id'], $userId, $userId === null ? Visitor::hash() : null);
-
-        if (Response::wantsJson()) {
-            Response::json(['liked' => $result['liked'], 'count' => $result['count'], 'label' => formatCount($result['count'])]);
-        }
-
-        Response::back('/port-rider', (string) $place['slug']);
     }
 
     /**
@@ -135,20 +96,5 @@ final class PortRiderController extends Controller
 
         http_response_code(204);
         exit;
-    }
-
-    /**
-     * @param list<array<string,mixed>> $places
-     * @return list<int>
-     */
-    public static function likedIdsFor(PortRiderRepository $repository, array $places): array
-    {
-        $userId = Auth::id();
-
-        return $repository->likedIds(
-            array_map(static fn (array $p): int => (int) $p['id'], $places),
-            $userId,
-            $userId === null ? Visitor::existingHash() : null,
-        );
     }
 }

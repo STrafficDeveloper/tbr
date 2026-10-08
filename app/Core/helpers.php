@@ -82,19 +82,34 @@ function formatDate(?string $date, bool $withTime = false): string
     $months = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogo', 'Sep', 'Okt', 'Nov', 'Dis'];
     $text = date('j', $timestamp) . ' ' . $months[(int) date('n', $timestamp) - 1] . ' ' . date('Y', $timestamp);
 
-    if (!$withTime) {
-        return $text;
-    }
+    return $withTime ? $text . ', ' . formatTime($date) : $text;
+}
 
-    $hour = (int) date('G', $timestamp);
-    $period = match (true) {
-        $hour < 12 => 'pagi',
-        $hour < 14 => 'tengah hari',
-        $hour < 19 => 'petang',
-        default => 'malam',
+/** "10:00 pagi", or "10:00 pagi – 3:00 petang" when an end time is given. */
+function formatTime(?string $start, ?string $end = null): string
+{
+    $label = static function (?string $value): string {
+        $timestamp = $value === null || $value === '' ? false : strtotime($value);
+
+        if ($timestamp === false) {
+            return '';
+        }
+
+        $hour = (int) date('G', $timestamp);
+        $period = match (true) {
+            $hour < 12 => 'pagi',
+            $hour < 14 => 'tengah hari',
+            $hour < 19 => 'petang',
+            default => 'malam',
+        };
+
+        return date('g:i', $timestamp) . ' ' . $period;
     };
 
-    return $text . ', ' . date('g:i', $timestamp) . ' ' . $period;
+    $from = $label($start);
+    $to = $label($end);
+
+    return $to === '' ? $from : $from . ' – ' . $to;
 }
 
 /** "1 Okt – 31 Okt 2026", or with both years when a range crosses New Year. */
@@ -170,4 +185,37 @@ function slugify(string $value): string
     $value = preg_replace('/[^a-z0-9]+/', '-', $value) ?? '';
 
     return trim($value, '-');
+}
+
+/**
+ * "Get directions" links for a place or pit stop: exact coordinates when the
+ * admin entered them, otherwise the saved map link or a search by name.
+ *
+ * @param array<string,mixed> $place needs name/location_name, and optionally
+ *                                   latitude, longitude, maps_url, address, city/state
+ * @return array{google:string,waze:string}
+ */
+function directionLinks(array $place): array
+{
+    $query = implode(', ', array_filter([
+        $place['location_name'] ?? $place['name'] ?? null,
+        $place['address'] ?? null,
+        $place['city'] ?? null,
+    ], static fn ($part): bool => is_string($part) && $part !== ''));
+
+    if (!empty($place['latitude']) && !empty($place['longitude'])) {
+        $point = $place['latitude'] . ',' . $place['longitude'];
+
+        return [
+            'google' => 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode($point),
+            'waze' => 'https://waze.com/ul?ll=' . rawurlencode($point) . '&navigate=yes',
+        ];
+    }
+
+    return [
+        'google' => !empty($place['maps_url'])
+            ? (string) $place['maps_url']
+            : 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($query),
+        'waze' => 'https://waze.com/ul?q=' . rawurlencode($query) . '&navigate=yes',
+    ];
 }

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controllers\PitStopController;
 use App\Core\Config;
 use App\Core\Csrf;
 use App\Core\Paginator;
@@ -14,6 +15,9 @@ use App\Core\Paginator;
  * @var string|null $status
  * @var string $search
  * @var array<string,string> $statuses
+ * @var string $hadir                        '', 'ya' or 'belum'
+ * @var array<string,string> $attendanceOptions
+ * @var array{expected:int,attended:int}|null $summary  when one pit stop is picked
  * @var string $exportUrl
  */
 $states = Config::get('site.states', []);
@@ -41,8 +45,17 @@ $statusClass = ['pending' => 'pending', 'approved' => 'approved', 'rejected' => 
         </select>
     </label>
     <label>
+        <span class="field__label">Kehadiran</span>
+        <select class="field__control" name="hadir">
+            <option value="">Semua</option>
+<?php foreach ($attendanceOptions as $key => $label): ?>
+            <option value="<?= e($key) ?>"<?= $hadir === $key ? ' selected' : '' ?>><?= e($label) ?></option>
+<?php endforeach; ?>
+        </select>
+    </label>
+    <label>
         <span class="field__label">Cari</span>
-        <input class="field__control" type="search" name="q" value="<?= e($search) ?>" placeholder="Nama, telefon, plat...">
+        <input class="field__control" type="search" name="q" value="<?= e($search) ?>" placeholder="TBR-000042, nama, telefon, plat...">
     </label>
     <div class="admin-filters__actions">
         <button class="admin-btn" type="submit">Tapis</button>
@@ -50,6 +63,12 @@ $statusClass = ['pending' => 'pending', 'approved' => 'approved', 'rejected' => 
     </div>
 </form>
 
+<?php if ($summary !== null): ?>
+<p class="admin-attendance">
+    <strong><?= number_format($summary['attended']) ?> / <?= number_format($summary['expected']) ?></strong> rider telah hadir
+    <span class="admin-muted">(tidak termasuk pendaftaran yang ditolak)</span>
+</p>
+<?php endif; ?>
 <p class="admin-muted"><?= number_format($paginator->total) ?> pendaftaran</p>
 
 <?php if ($rows === []): ?>
@@ -59,17 +78,20 @@ $statusClass = ['pending' => 'pending', 'approved' => 'approved', 'rejected' => 
     <table class="admin-table">
         <thead>
             <tr>
+                <th scope="col">No.</th>
                 <th scope="col">Rider</th>
                 <th scope="col">Plat</th>
                 <th scope="col">Pit stop</th>
                 <th scope="col">Didaftar</th>
                 <th scope="col">Status</th>
+                <th scope="col">Hadir</th>
                 <th scope="col"><span class="visually-hidden">Tindakan</span></th>
             </tr>
         </thead>
         <tbody>
 <?php foreach ($rows as $row): ?>
-            <tr>
+            <tr id="pendaftaran-<?= (int) $row['id'] ?>">
+                <td><?= e(PitStopController::reference((int) $row['id'])) ?></td>
                 <td>
                     <strong><?= e($row['name']) ?></strong>
                     <div class="admin-muted">
@@ -81,6 +103,20 @@ $statusClass = ['pending' => 'pending', 'approved' => 'approved', 'rejected' => 
                 <td><?= e($row['event_title']) ?><div class="admin-muted"><?= e(formatDate((string) $row['starts_at'])) ?></div></td>
                 <td><?= e(formatDate((string) $row['created_at'], true)) ?></td>
                 <td><span class="status status--<?= e($statusClass[$row['status']] ?? 'pending') ?>"><?= e($statuses[$row['status']] ?? $row['status']) ?></span></td>
+                <td>
+                    <form method="post" action="/admin/pendaftaran/<?= (int) $row['id'] ?>/hadir" class="admin-inline">
+                        <?= Csrf::field() ?>
+<?php if ($row['attended_at'] === null): ?>
+                        <button class="admin-btn admin-btn--checkin" name="hadir" value="1">Tandakan hadir</button>
+<?php else: ?>
+                        <button class="admin-btn admin-btn--checked" name="hadir" value="0"
+                                aria-label="Hadir pada <?= e(formatDate((string) $row['attended_at'], true)) ?>. Klik untuk batalkan.">
+                            <?= icon('check', 'icon icon--sm') ?> Hadir
+                        </button>
+                        <div class="admin-muted"><?= e(formatTime((string) $row['attended_at'])) ?></div>
+<?php endif; ?>
+                    </form>
+                </td>
                 <td class="admin-table__actions">
                     <form method="post" action="/admin/pendaftaran/<?= (int) $row['id'] ?>/status" class="admin-inline">
                         <?= Csrf::field() ?>

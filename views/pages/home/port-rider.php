@@ -10,7 +10,6 @@ use App\Core\Config;
  *
  * @var list<array<string,mixed>> $places
  * @var list<string> $states
- * @var list<int> $likedIds
  */
 $stateNames = Config::get('site.states', []);
 $options = ['' => 'All'];
@@ -35,7 +34,7 @@ foreach ($states as $key) {
 <?php else: ?>
         <div class="grid grid--rail">
 <?php foreach ($places as $place): ?>
-            <?= component('card-port-rider', ['place' => $place, 'liked' => in_array((int) $place['id'], $likedIds, true)]) ?>
+            <?= component('card-port-rider', ['place' => $place]) ?>
 <?php endforeach; ?>
         </div>
 <?php endif; ?>

@@ -14,12 +14,15 @@ final class PitStopRegistrationRepository
      * Books a slot. The event row is locked for the duration, so two riders
      * racing for the last slot can't both get it.
      *
-     * @param array<string,mixed> $member the signed-in user (name, phone, email)
+     * Anyone can book: $person carries the details typed into the form, and
+     * user_id is set only when a signed-in member made the booking.
+     *
+     * @param array{user_id:?int,name:string,phone:string,email:string} $person
      * @throws ValidationException field => message when the booking can't be made
      */
-    public function register(string $eventSlug, array $member, string $plate, ?string $state, ?string $consentIp): int
+    public function register(string $eventSlug, array $person, string $plate, ?string $state, ?string $consentIp): int
     {
-        return Database::transaction(function () use ($eventSlug, $member, $plate, $state, $consentIp): int {
+        return Database::transaction(function () use ($eventSlug, $person, $plate, $state, $consentIp): int {
             $event = Database::selectOne(
                 'SELECT id, capacity, status, starts_at FROM pitstop_events WHERE slug = ? FOR UPDATE',
                 [$eventSlug],
@@ -29,13 +32,15 @@ final class PitStopRegistrationRepository
                 throw new ValidationException(['event' => 'Pendaftaran untuk pit stop ini telah ditutup.']);
             }
 
-            $existing = Database::selectOne(
-                'SELECT id FROM pitstop_registrations WHERE event_id = ? AND user_id = ? LIMIT 1',
-                [$event['id'], $member['id']],
-            );
+            if ($person['user_id'] !== null) {
+                $existing = Database::selectOne(
+                    'SELECT id FROM pitstop_registrations WHERE event_id = ? AND user_id = ? LIMIT 1',
+                    [$event['id'], $person['user_id']],
+                );
 
-            if ($existing !== null) {
-                throw new ValidationException(['event' => 'Anda sudah mendaftar untuk pit stop ini.']);
+                if ($existing !== null) {
+                    throw new ValidationException(['event' => 'Anda sudah mendaftar untuk pit stop ini.']);
+                }
             }
 
             if ($event['capacity'] !== null) {
@@ -56,10 +61,10 @@ final class PitStopRegistrationRepository
                      VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW(), ?, ?)',
                     [
                         $event['id'],
-                        $member['id'],
-                        $member['name'],
-                        $member['phone'],
-                        $member['email'],
+                        $person['user_id'],
+                        $person['name'],
+                        $person['phone'],
+                        $person['email'],
                         $plate,
                         $state,
                         $consentIp,
@@ -81,26 +86,28 @@ final class PitStopRegistrationRepository
         });
     }
 
-    /** @return array<string,mixed>|null one of this member's registrations, with its event */
-    public function findForUser(int $registrationId, int $userId): ?array
+    /** @return array<string,mixed>|null a registration with everything the confirmation page and email show */
+    public function findForConfirmation(int $registrationId): ?array
     {
         return Database::selectOne(
-            'SELECT r.id, r.plate_no, r.status, r.created_at, e.title, e.slug, e.starts_at, e.location_name, e.state
+            'SELECT r.id, r.name, r.email, r.phone, r.plate_no, r.status, r.created_at,
+                    e.title, e.slug, e.starts_at, e.ends_at, e.location_name, e.address, e.state,
+                    e.maps_url, e.latitude, e.longitude
              FROM pitstop_registrations r
              JOIN pitstop_events e ON e.id = r.event_id
-             WHERE r.id = ? AND r.user_id = ?
+             WHERE r.id = ?
              LIMIT 1',
-            [$registrationId, $userId],
+            [$registrationId],
         );
     }
 
     /** @return list<array<string,mixed>> */
-    public function adminList(?int $eventId, ?string $status, string $search, int $limit, int $offset): array
+    public function adminList(?int $eventId, ?string $status, ?bool $attended, string $search, int $limit, int $offset): array
     {
-        [$where, $bindings] = $this->adminFilters($eventId, $status, $search);
+        [$where, $bindings] = $this->adminFilters($eventId, $status, $attended, $search);
 
         return Database::select(
-            "SELECT r.id, r.name, r.phone, r.email, r.plate_no, r.state, r.status, r.created_at, r.consent_at,
+            "SELECT r.id, r.name, r.phone, r.email, r.plate_no, r.state, r.status, r.created_at, r.consent_at, r.attended_at,
                     e.title AS event_title, e.starts_at
              FROM pitstop_registrations r
              JOIN pitstop_events e ON e.id = r.event_id
@@ -111,9 +118,9 @@ final class PitStopRegistrationRepository
         );
     }
 
-    public function adminCount(?int $eventId, ?string $status, string $search): int
+    public function adminCount(?int $eventId, ?string $status, ?bool $attended, string $search): int
     {
-        [$where, $bindings] = $this->adminFilters($eventId, $status, $search);
+        [$where, $bindings] = $this->adminFilters($eventId, $status, $attended, $search);
         $row = Database::selectOne(
             "SELECT COUNT(*) AS n FROM pitstop_registrations r JOIN pitstop_events e ON e.id = r.event_id WHERE {$where}",
             $bindings,
@@ -149,8 +156,29 @@ final class PitStopRegistrationRepository
         );
     }
 
+    /** Ticks a rider in at the pit stop, or clears a tick made by mistake. */
+    public function setAttended(int $id, bool $attended): void
+    {
+        Database::execute(
+            'UPDATE pitstop_registrations SET attended_at = ' . ($attended ? 'NOW()' : 'NULL') . ' WHERE id = ?',
+            [$id],
+        );
+    }
+
+    /** @return array{expected:int,attended:int} riders booked (not rejected) and riders ticked in */
+    public function attendanceSummary(int $eventId): array
+    {
+        $row = Database::selectOne(
+            'SELECT COUNT(*) AS expected, COUNT(attended_at) AS attended
+             FROM pitstop_registrations WHERE event_id = ? AND status <> ?',
+            [$eventId, 'rejected'],
+        );
+
+        return ['expected' => (int) ($row['expected'] ?? 0), 'attended' => (int) ($row['attended'] ?? 0)];
+    }
+
     /** @return array{0:string,1:list<string|int>} */
-    private function adminFilters(?int $eventId, ?string $status, string $search): array
+    private function adminFilters(?int $eventId, ?string $status, ?bool $attended, string $search): array
     {
         $where = ['1 = 1'];
         $bindings = [];
@@ -165,7 +193,15 @@ final class PitStopRegistrationRepository
             $bindings[] = $status;
         }
 
-        if ($search !== '') {
+        if ($attended !== null) {
+            $where[] = $attended ? 'r.attended_at IS NOT NULL' : 'r.attended_at IS NULL';
+        }
+
+        // The crew types the number riders show from their confirmation, e.g. "TBR-000042".
+        if (preg_match('/^TBR-?0*(\d+)$/i', $search, $reference) === 1) {
+            $where[] = 'r.id = ?';
+            $bindings[] = (int) $reference[1];
+        } elseif ($search !== '') {
             $like = '%' . addcslashes($search, '%_\\') . '%';
             $where[] = '(r.name LIKE ? OR r.phone LIKE ? OR r.plate_no LIKE ? OR r.email LIKE ?)';
             array_push($bindings, $like, $like, $like, $like);

@@ -114,7 +114,22 @@ final class AuthController extends Controller
             $this->redirectWithStatus($intended, 'Tahniah, anda kini ahli The Bikers Ranger! Teruskan pendaftaran anda.');
         }
 
-        $this->backToSignup('success', 'Tahniah, pendaftaran berjaya! Jemputan pit stop akan dihantar melalui WhatsApp.');
+        Session::flash('_welcome', true);
+        Response::redirect('/daftar/berjaya');
+    }
+
+    /** "Selamat datang": shown once, straight after signing up, pointing to the pit stop form. */
+    public function welcome(Request $request): string
+    {
+        Auth::requireLogin($request);
+
+        if (Session::getFlash('_welcome') !== true) {
+            Response::redirect('/');
+        }
+
+        $seo = $this->seo()->setTitle('Pendaftaran Berjaya')->noIndex();
+
+        return $this->view('pages/auth/welcome', ['seo' => $seo, 'member' => Auth::user()]);
     }
 
     /**

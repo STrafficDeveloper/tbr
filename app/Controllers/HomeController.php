@@ -49,7 +49,6 @@ final class HomeController extends Controller
             'stats' => $site->stats(),
             'events' => $events,
             'portRiders' => $places,
-            'likedPlaceIds' => PortRiderController::likedIdsFor($portRiders, $places),
             'portRiderStates' => $portRiders->statesWithListings(),
             'hero' => (new HallOfFameRepository())->heroOfMonth(),
             'featuredVideo' => (new VideoRepository())->latest('panas_atas_jalan', 1)[0] ?? null,

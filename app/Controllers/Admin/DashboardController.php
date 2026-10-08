@@ -20,7 +20,7 @@ final class DashboardController extends AdminController
         return $this->adminView('dashboard', 'Papan Pemuka', [
             'members' => (new UserRepository())->stats(),
             'registrationCounts' => $registrations->countsByStatus(),
-            'pending' => $registrations->adminList(null, 'pending', '', 8, 0),
+            'pending' => $registrations->adminList(null, 'pending', null, '', 8, 0),
             'upcoming' => (new PitStopEventRepository())->upcoming(5),
             'listingCount' => (int) ($listings['n'] ?? 0),
         ]);

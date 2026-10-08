@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Core\View;
 
 /**
  * @var array<string,mixed> $album
@@ -41,4 +40,3 @@ $albumTabs = array_map(
 <?php endif; ?>
     </div>
 </section>
-<?= View::partial('partials/lightbox') ?>

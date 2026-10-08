@@ -67,53 +67,18 @@
         }, 6000);
     }
 
-    // Hearts: post in the background and update in place. Without JS (or if
-    // this fails) the form simply submits and the server redirects back.
-    document.addEventListener('submit', function (event) {
-        var form = event.target.closest('[data-like-form]');
-
-        if (!form || !window.fetch) {
-            return;
-        }
-
-        event.preventDefault();
-        var button = form.querySelector('button');
-        button.disabled = true;
-
-        fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form),
-            headers: { Accept: 'application/json' },
-            credentials: 'same-origin'
-        })
-            .then(function (response) {
-                return response.ok ? response.json() : Promise.reject(response);
-            })
-            .then(function (data) {
-                button.setAttribute('aria-pressed', String(data.liked));
-                form.querySelector('[data-like-count]').textContent = data.label;
-                form.querySelector('[data-like-total]').textContent = data.count.toLocaleString('en-US');
-            })
-            .catch(function () {
-                form.submit();
-            })
-            .finally(function () {
-                button.disabled = false;
-            });
-    });
-
     // "View Location" opens the map in a new tab; tell the server so the eye
     // count goes up. sendBeacon survives the page losing focus.
     document.addEventListener('click', function (event) {
         var link = event.target.closest('[data-view-beacon]');
-        var token = document.querySelector('input[name="_csrf_token"]');
+        var token = document.querySelector('meta[name="csrf-token"]');
 
         if (!link || !token || !navigator.sendBeacon) {
             return;
         }
 
         var body = new FormData();
-        body.append('_csrf_token', token.value);
+        body.append('_csrf_token', token.content);
         navigator.sendBeacon(link.getAttribute('data-view-beacon'), body);
     });
 
@@ -125,19 +90,33 @@
     if (lightbox && typeof lightbox.showModal === 'function') {
         var stage = lightbox.querySelector('[data-lightbox-stage]');
         var caption = lightbox.querySelector('[data-lightbox-caption]');
+        var promo = lightbox.querySelector('[data-lightbox-promo]');
 
-        var openWith = function (node, text) {
+        // label names the dialog for screen readers; detail pop-ups also show the sponsor banner.
+        var openWith = function (node, text, label, isDetail) {
             stage.replaceChildren(node);
             caption.textContent = text || '';
             caption.hidden = !text;
+            lightbox.setAttribute('aria-label', label || 'Paparan media');
+            lightbox.classList.toggle('lightbox--detail', Boolean(isDetail));
+            if (promo) {
+                promo.hidden = !isDetail;
+            }
             lightbox.showModal();
         };
 
         document.addEventListener('click', function (event) {
             var photo = event.target.closest('[data-lightbox-image]');
             var video = event.target.closest('[data-video-id]');
+            var detail = event.target.closest('[data-detail]');
+            var template = detail ? document.getElementById(detail.getAttribute('data-detail')) : null;
 
-            if (photo) {
+            if (template) {
+                event.preventDefault();
+                var content = template.content.cloneNode(true);
+                var heading = content.querySelector('h2');
+                openWith(content, '', heading ? heading.textContent.trim() : '', true);
+            } else if (photo) {
                 event.preventDefault();
                 var img = document.createElement('img');
                 img.src = photo.getAttribute('href');

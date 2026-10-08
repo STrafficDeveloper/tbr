@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Core\View;
 
 /**
  * @var array<string,mixed> $profile
@@ -79,5 +78,4 @@ $followUrl = $profile['instagram_url'] ?: ($profile['facebook_url'] ?: $profile[
     </div>
 </section>
 <?php if ($tab !== 'biodata'): ?>
-<?= View::partial('partials/lightbox') ?>
 <?php endif; ?>

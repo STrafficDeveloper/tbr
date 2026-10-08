@@ -28,6 +28,7 @@ $router->get('/robots.txt', [SeoController::class, 'robots']);
 // Membership
 $router->get('/daftar', [AuthController::class, 'showSignup']);
 $router->post('/daftar', [AuthController::class, 'register']);
+$router->get('/daftar/berjaya', [AuthController::class, 'welcome']);
 $router->get('/log-masuk', [AuthController::class, 'showLogin']);
 $router->post('/log-masuk', [AuthController::class, 'login']);
 $router->post('/log-keluar', [AuthController::class, 'logout']);
@@ -72,6 +73,7 @@ $router->get('/admin', [DashboardController::class, 'index']);
 $router->get('/admin/pendaftaran', [RegistrationController::class, 'index']);
 $router->get('/admin/pendaftaran/eksport', [RegistrationController::class, 'export']);
 $router->post('/admin/pendaftaran/{id}/status', [RegistrationController::class, 'updateStatus']);
+$router->post('/admin/pendaftaran/{id}/hadir', [RegistrationController::class, 'updateAttendance']);
 $router->get('/admin/ahli', [MemberController::class, 'index']);
 $router->get('/admin/ahli/eksport-whatsapp', [MemberController::class, 'exportWhatsapp']);
 $router->post('/admin/ahli/{id}/status', [MemberController::class, 'updateStatus']);
@@ -87,5 +89,4 @@ $router->post('/admin/urus/{resource}/{id}/padam', [ResourceController::class, '
 
 // Directory
 $router->get('/port-rider', [PortRiderController::class, 'index']);
-$router->post('/port-rider/{slug}/suka', [PortRiderController::class, 'like']);
 $router->post('/port-rider/{slug}/lihat', [PortRiderController::class, 'recordView']);

@@ -50,10 +50,18 @@ return [
             'url' => '/aktiviti/event',
             'children' => $aktivitiTabs,
         ],
+        [
+            'label' => 'PORT RIDER',
+            'url' => '/port-rider',
+            'children' => [['label' => 'Bike Shop & Pitstop', 'url' => '/port-rider']],
+        ],
+        [
+            'label' => 'HALL OF FAME',
+            'url' => '/hall-of-fame',
+            'children' => [['label' => 'Biodata', 'url' => '/hall-of-fame']],
+        ],
         ['label' => 'PANAS ATAS JALAN', 'url' => '/panas-atas-jalan'],
         ['label' => 'PIT STOP REGISTRATION', 'url' => '/pit-stop/daftar'],
-        ['label' => 'HALL OF FAME', 'url' => '/hall-of-fame'],
-        ['label' => 'PORT RIDER', 'url' => '/port-rider'],
     ],
 
     'aktiviti_tabs' => $aktivitiTabs,

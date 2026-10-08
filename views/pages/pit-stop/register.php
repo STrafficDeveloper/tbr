@@ -6,7 +6,7 @@ use App\Core\Config;
 use App\Core\Csrf;
 
 /**
- * @var array<string,mixed>|null $member
+ * @var array<string,mixed>|null $member        signed in: their details pre-fill the form
  * @var list<array<string,mixed>> $events       open for booking
  * @var string $selected                         slug preselected from ?acara=
  * @var list<array<string,mixed>> $registrations this member's bookings
@@ -24,17 +24,7 @@ $statusLabels = ['pending' => 'Dalam semakan', 'approved' => 'Disahkan', 'reject
         <div class="register-card">
             <h1 class="register-card__title" id="page-title">Daftar Sekarang Untuk Join Event Pitstop Kami</h1>
 
-<?php if ($member === null): ?>
-            <p class="register-card__lead">
-                Slot pit stop dibuka untuk ahli The Bikers Ranger. Log masuk, atau daftar jadi member secara percuma,
-                dan kami akan bawa anda kembali ke sini untuk tempah slot.
-            </p>
-            <div class="register-card__actions">
-                <a class="btn btn--primary" href="/log-masuk">Log Masuk</a>
-                <a class="btn btn--ghost" href="/#daftar">Daftar Jadi Member</a>
-            </div>
-
-<?php elseif ($eventOptions === []): ?>
+<?php if ($eventOptions === []): ?>
             <p class="register-card__lead">Isi maklumat di bawah untuk daftar</p>
             <?= component('empty-state', [
                 'message' => 'Tiada pit stop dibuka untuk pendaftaran buat masa ini.',
@@ -44,12 +34,46 @@ $statusLabels = ['pending' => 'Dalam semakan', 'approved' => 'Disahkan', 'reject
 
 <?php else: ?>
             <p class="register-card__lead">Isi maklumat di bawah untuk daftar</p>
+<?php if ($member !== null): ?>
+            <p class="register-card__prefill">
+                <?= icon('check', 'icon icon--sm') ?>
+                Maklumat anda telah diisi daripada akaun ahli. Semak dan lengkapkan yang selebihnya.
+            </p>
+<?php endif; ?>
 
             <form class="form" method="post" action="/pit-stop/daftar">
                 <?= Csrf::field() ?>
                 <?= component('form/input', [
+                    'name' => 'name',
+                    'label' => 'Nama Penuh',
+                    'required' => true,
+                    'placeholder' => 'cth: Ahmad bin Abdullah',
+                    'autocomplete' => 'name',
+                    'value' => (string) ($member['name'] ?? ''),
+                ]) ?>
+                <?= component('form/input', [
+                    'name' => 'phone',
+                    'label' => 'Nombor Telefon',
+                    'type' => 'tel',
+                    'required' => true,
+                    'placeholder' => 'cth: 015-558-8645',
+                    'autocomplete' => 'tel',
+                    'inputmode' => 'tel',
+                    'value' => isset($member['phone']) ? displayPhone((string) $member['phone']) : '',
+                ]) ?>
+                <?= component('form/input', [
+                    'name' => 'email',
+                    'label' => 'Alamat E-mel',
+                    'type' => 'email',
+                    'required' => true,
+                    'placeholder' => 'cth: abu@example.com',
+                    'autocomplete' => 'email',
+                    'hint' => 'Pengesahan pendaftaran dihantar ke e-mel ini.',
+                    'value' => (string) ($member['email'] ?? ''),
+                ]) ?>
+                <?= component('form/input', [
                     'name' => 'plate',
-                    'label' => 'Nombor Plate Biker',
+                    'label' => 'Nombor Plat Motosikal',
                     'required' => true,
                     'placeholder' => 'cth: WXY 1234',
                     'autocomplete' => 'off',
@@ -72,15 +96,14 @@ $statusLabels = ['pending' => 'Dalam semakan', 'approved' => 'Disahkan', 'reject
                     'value' => (string) ($member['state'] ?? ''),
                 ]) ?>
 
-                <p class="register-card__contact">
-                    <?= icon('whatsapp', 'icon icon--sm') ?>
-                    Jemputan akan dihantar ke WhatsApp <strong><?= e(displayPhone($member['phone'] ?? null)) ?></strong>.
-                    <a href="/tetapan">Tukar nombor</a>
-                </p>
+                <div class="hp" aria-hidden="true">
+                    <label for="field-website">Website</label>
+                    <input id="field-website" name="website" type="text" tabindex="-1" autocomplete="off">
+                </div>
 
                 <?= component('form/checkbox', [
                     'name' => 'pdpa',
-                    'label' => 'I agree to the processing of personal data',
+                    'label' => 'Saya bersetuju dengan pemprosesan data peribadi saya',
                     'required' => true,
                 ]) ?>
                 <p class="field__hint"><?= e((string) Config::get('site.privacy_note')) ?></p>

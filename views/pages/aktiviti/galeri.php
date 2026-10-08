@@ -23,7 +23,6 @@ use App\Core\View;
                 'image' => $album['cover_image'] ?: $album['first_image'],
                 'excerpt' => $album['description'],
                 'meta' => $count > 0 ? number_format($count) . ' gambar' : null,
-                'likes' => (int) $album['likes_count'],
                 'views' => (int) $album['views_count'],
             ]) ?>
 <?php endforeach; ?>
